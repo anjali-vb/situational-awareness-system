@@ -43,8 +43,16 @@
 
 4. **Run the Tests**
 
+   Run all tests in a single command:
+
    ```bash
    python -m unittest discover -s tests -p "test_*.py"
+   ```
+
+   Run all tests with verbose output:
+
+   ```bash
+   python -m unittest discover -s tests -p "test_*.py" -v
    ```
 
    Or run a specific test file:
@@ -58,12 +66,14 @@
 All tests should pass with output similar to:
 
 ```
-.....
+....................
 ----------------------------------------------------------------------
-Ran 5 tests in 0.001s
+Ran 20 tests in 0.001s
 
 OK
 ```
+
+When running with verbose output (`-v`), you'll see each test name as it runs.
 
 ### What Each Test Does
 
