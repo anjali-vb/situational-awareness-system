@@ -20,3 +20,26 @@ class World:
         for target in self.targets:
             target.step(dt_hours)
     
+
+
+    #adding and removing targets
+    def add_target(self, target: Vessel) -> None:
+        """
+        Add a target vessel to the world.
+        """
+        self.targets.append(target)
+
+    def remove_target(self, vessel_id: str) -> bool:
+        """
+        Remove a target vessel by ID.
+
+        Returns:
+            True if removed, False if not found
+        """
+        for i, target in enumerate(self.targets):
+            if target.vessel_id == vessel_id:
+                del self.targets[i]
+                return True
+
+        return False
+        
