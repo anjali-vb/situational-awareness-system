@@ -1,4 +1,5 @@
-from typing import List
+from typing import Any, Dict, List
+from alert import alert_text, generate_alert
 from vessel import Vessel
 
 
@@ -42,4 +43,44 @@ class World:
                 return True
 
         return False
-        
+    
+
+    def snapshot(self) -> Dict[str, Any]:
+        """
+        Return a JSON-serializable snapshot including
+        CPA, TCPA, risk, and human-readable alert text.
+        """
+        return {
+            "own": self._own_snapshot(),
+            "targets": [self._target_snapshot(t) for t in self.targets],
+        }
+
+    def _own_snapshot(self) -> Dict[str, Any]:
+        return {
+            "id": self.own.vessel_id,
+            "position": {
+                "x": self.own.position.x,
+                "y": self.own.position.y,
+            },
+            "speed_knots": self.own.speed_knots,
+            "heading_deg": self.own.heading_deg,
+        }
+
+    def _target_snapshot(self, target: Vessel) -> Dict[str, Any]:
+        alert = generate_alert(self.own, target)
+
+        return {
+            "id": target.vessel_id,
+            "position": {
+                "x": target.position.x,
+                "y": target.position.y,
+            },
+            "speed_knots": target.speed_knots,
+            "heading_deg": target.heading_deg,
+            "alert": {
+                "risk": alert.risk_level.value,
+                "cpa_nm": alert.cpa_nm,
+                "tcpa_hours": alert.tcpa_hours,
+                "text": alert_text(alert),
+            },
+        }

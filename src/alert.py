@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import cmp_to_key
 from typing import Iterable, List
 from risk import RiskLevel, classify_risk
 from cpa import cpa_distance, tcpa
@@ -59,3 +60,55 @@ def generate_alerts(
             alerts.append(alert)
 
     return alerts
+
+def alert_text(alert: Alert) -> str:
+    if alert.cpa_nm is None:
+        return f"No collision risk – {alert.risk_level.value}"
+
+    if alert.tcpa_hours is None:
+        return f"CPA {alert.cpa_nm:.1f} nm – {alert.risk_level.value}"
+
+    if alert.tcpa_hours < 0:
+        return f"Opening, CPA {alert.cpa_nm:.1f} nm – {alert.risk_level.value}"
+
+    tcpa_minutes = int(round(alert.tcpa_hours * 60))
+    return (
+         f"CPA {alert.cpa_nm:.1f} nm "
+        f"in {tcpa_minutes} min – {alert.risk_level.value}"
+    )
+def sort_alerts(alerts: List[Alert]) -> List[Alert]:
+    """
+    Sort alerts using a traditional comparator:
+    1. Risk level (DANGER > WARNING > SAFE)
+    2. CPA distance (smaller is higher priority)
+    """
+
+    risk_priority = {
+        RiskLevel.DANGER: 0,
+        RiskLevel.WARNING: 1,
+        RiskLevel.SAFE: 2,
+    }
+
+    def compare(a: Alert, b: Alert) -> int:
+        # 1. Compare risk level
+        rp_diff = (
+            risk_priority[a.risk_level]
+            - risk_priority[b.risk_level]
+        )
+        if rp_diff != 0:
+            return rp_diff
+
+        # 2. Compare CPA distance
+        if a.cpa_nm is None and b.cpa_nm is None:
+            return 0
+        if a.cpa_nm is None:
+            return 1
+        if b.cpa_nm is None:
+            return -1
+
+        # Traditional comparison idiom
+        return (a.cpa_nm > b.cpa_nm) - (a.cpa_nm < b.cpa_nm)
+
+    return sorted(alerts, key=cmp_to_key(compare))
+
+    
