@@ -1,5 +1,5 @@
 from typing import Any, Dict, List
-from alert import alert_text, generate_alert
+from alert import alert_text, generate_alert, generate_alerts, sort_alerts
 from vessel import Vessel
 
 
@@ -44,15 +44,29 @@ class World:
 
         return False
     
-
     def snapshot(self) -> Dict[str, Any]:
         """
-        Return a JSON-serializable snapshot including
-        CPA, TCPA, risk, and human-readable alert text.
+        Snapshot including:
+        - own vessel
+        - targets with embedded alert info
+        - sorted alert list for UI panels
         """
+        alerts = sort_alerts(
+            generate_alerts(self.own, self.targets, include_safe=False)
+        )
+
         return {
             "own": self._own_snapshot(),
             "targets": [self._target_snapshot(t) for t in self.targets],
+            "alerts": [
+                {
+                    "target_id": a.target_id,
+                    "risk": a.risk_level.value,
+                    "cpa_nm": a.cpa_nm,
+                    "tcpa_hours": a.tcpa_hours,
+                }
+                for a in alerts
+            ],
         }
 
     def _own_snapshot(self) -> Dict[str, Any]:
@@ -67,6 +81,8 @@ class World:
         }
 
     def _target_snapshot(self, target: Vessel) -> Dict[str, Any]:
+        from alert import generate_alert, alert_text
+
         alert = generate_alert(self.own, target)
 
         return {
