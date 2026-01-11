@@ -1,6 +1,6 @@
 import math
 from dataclasses import dataclass
-
+from position import Position
 
 #Reduces boilerplate code (no need to manually write __init__)
 @dataclass
@@ -9,8 +9,7 @@ class Vessel:
     Represents a vessel with position, speed, and heading.
     """
     vessel_id: str
-    x: float  # Longitude or X position
-    y: float  # Latitude or Y position
+    position : Position
     speed_knots: float
     heading_deg: float  # 0° = North, 90° = East
 
@@ -29,3 +28,16 @@ class Vessel:
         vy = self.speed_knots * math.cos(heading_rad)
 
         return vx, vy
+
+    def step(self, dt_hours: float) -> None:
+         """
+        Advance vessel position by dt_hours.
+
+        Args:
+            dt_hours: Time step in hours
+        """
+         vx, vy = self.velocity_vector()
+         self.position = Position(
+            x=self.position.x + vx * dt_hours,
+            y=self.position.y + vy * dt_hours
+        )

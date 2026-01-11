@@ -1,4 +1,5 @@
 import unittest
+from position import Position
 from vessel import Vessel
 
 
@@ -9,8 +10,7 @@ class TestVessel(unittest.TestCase):
     def test_velocity_north(self):
         vessel = Vessel(
             vessel_id="A",
-            x=0.0,
-            y=0.0,
+            position=Position(0,0),
             speed_knots=10.0,
             heading_deg=0.0
         )
@@ -21,8 +21,7 @@ class TestVessel(unittest.TestCase):
     def test_velocity_east(self):
         vessel = Vessel(
             vessel_id="B",
-            x=0.0,
-            y=0.0,
+            position=Position(0,0),
             speed_knots=5.0,
             heading_deg=90.0
         )
@@ -33,8 +32,7 @@ class TestVessel(unittest.TestCase):
     def test_velocity_south(self):
         vessel = Vessel(
             vessel_id="C",
-            x=0.0,
-            y=0.0,
+            position=Position(0,0),
             speed_knots=12.0,
             heading_deg=180.0
         )
@@ -45,8 +43,7 @@ class TestVessel(unittest.TestCase):
     def test_velocity_west(self):
         vessel = Vessel(
             vessel_id="D",
-            x=0.0,
-            y=0.0,
+            position=Position(0,0),
             speed_knots=7.0,
             heading_deg=270.0
         )
@@ -57,8 +54,7 @@ class TestVessel(unittest.TestCase):
     def test_velocity_diagonal(self):
         vessel = Vessel(
             vessel_id="E",
-            x=0.0,
-            y=0.0,
+            position=Position(0,0),
             speed_knots=10.0,
             heading_deg=45.0
         )
