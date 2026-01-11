@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Iterable, List
 from risk import RiskLevel, classify_risk
 from cpa import cpa_distance, tcpa
 from vessel import Vessel
@@ -32,3 +33,29 @@ def generate_alert(own: Vessel, target: Vessel) -> Alert:
         cpa_nm=cpa_distance(own, target),
         tcpa_hours=tcpa(own, target)
     )
+
+def generate_alerts(
+    own: Vessel,
+    targets: Iterable[Vessel],
+    include_safe: bool = False,
+) -> List[Alert]:
+    """
+    Generate collision alerts for multiple target vessels.
+
+    Args:
+        own: Own vessel
+        targets: Iterable of target vessels
+        include_safe: Whether to include SAFE alerts
+
+    Returns:
+        List of Alert objects
+    """
+    alerts: List[Alert] = []
+
+    for target in targets:
+        alert = generate_alert(own, target)
+
+        if include_safe or alert.risk_level != RiskLevel.SAFE:
+            alerts.append(alert)
+
+    return alerts
