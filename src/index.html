@@ -7,16 +7,10 @@
     
     <!-- ========================================
          CSS STYLES
-         All the visual styling for the page
     ======================================== -->
     <style>
-        /* ----- RESET & BASE STYLES ----- */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        /* ----- RESET & BASE ----- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #f5f5f5;
@@ -35,39 +29,16 @@
             align-items: center;
             border-bottom: 1px solid #ddd;
         }
-
-        header h1 {
-            font-size: 1.2em;
-            font-weight: 500;
-        }
-
-        /* Connection status indicator */
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9em;
-        }
-
+        header h1 { font-size: 1.2em; font-weight: 500; }
+        .status { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
         .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #dc3545; /* Red = disconnected */
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #dc3545;
         }
+        .status-dot.connected { background: #28a745; }
 
-        .status-dot.connected {
-            background: #28a745; /* Green = connected */
-        }
-
-        /* ----- MAIN LAYOUT ----- */
-        .main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        /* ----- LEFT SIDEBAR ----- */
+        /* ----- LAYOUT ----- */
+        .main { display: flex; flex: 1; overflow: hidden; }
         .sidebar {
             width: 280px;
             background: white;
@@ -75,7 +46,6 @@
             overflow-y: auto;
             padding: 15px;
         }
-
         .sidebar h2 {
             font-size: 0.85em;
             color: #666;
@@ -84,383 +54,110 @@
             padding-bottom: 5px;
             border-bottom: 1px solid #eee;
         }
+        .center { flex: 1; display: flex; flex-direction: column; background: #f5f5f5; }
 
-        /* Own vessel info box */
-        .info-box {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
+        /* ----- INFO BOX ----- */
+        .info-box { background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 20px; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.9em; }
+        .info-row:last-child { margin-bottom: 0; }
+        .label { color: #666; }
+        .value { font-family: monospace; color: #333; }
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-            font-size: 0.9em;
-        }
-
-        .info-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .label {
-            color: #666;
-        }
-
-        .value {
-            font-family: monospace;
-            color: #333;
-        }
-
-        /* Alert list */
-        .alert-list {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-        }
-
-        .alert {
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            border-left: 4px solid;
-        }
-
-        .alert.danger {
-            background: #fff5f5;
-            border-color: #dc3545;
-        }
-
-        .alert.warning {
-            background: #fffbf0;
-            border-color: #ffc107;
-        }
-
-        .alert.safe {
-            background: #f5fff7;
-            border-color: #28a745;
-        }
-
-        .alert-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
-        .alert-target {
-            font-weight: 600;
-        }
-
-        .alert-badge {
-            font-size: 0.75em;
-            padding: 2px 8px;
-            border-radius: 3px;
-            color: white;
-        }
-
+        /* ----- ALERTS ----- */
+        .alert-list { max-height: 200px; overflow-y: auto; margin-bottom: 20px; }
+        .alert { padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid; }
+        .alert.danger { background: #fff5f5; border-color: #dc3545; }
+        .alert.warning { background: #fffbf0; border-color: #ffc107; }
+        .alert.safe { background: #f5fff7; border-color: #28a745; }
+        .alert-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .alert-target { font-weight: 600; }
+        .alert-badge { font-size: 0.75em; padding: 2px 8px; border-radius: 3px; color: white; }
         .alert-badge.danger { background: #dc3545; }
         .alert-badge.warning { background: #ffc107; color: #333; }
         .alert-badge.safe { background: #28a745; }
+        .alert-details { font-size: 0.85em; color: #666; }
 
-        .alert-details {
-            font-size: 0.85em;
-            color: #666;
-        }
-
-        /* Target list */
-        .target-list {
-            margin-bottom: 20px;
-        }
-
+        /* ----- TARGETS ----- */
+        .target-list { margin-bottom: 20px; }
         .target {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            background: #f8f9fa;
-            border-radius: 4px;
-            margin-bottom: 6px;
-            font-size: 0.9em;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 10px; background: #f8f9fa; border-radius: 4px;
+            margin-bottom: 6px; font-size: 0.9em;
         }
+        .target-id { font-weight: 600; color: #0066cc; }
 
-        .target-id {
-            font-weight: 600;
-            color: #0066cc;
-        }
-
-        /* Legend */
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 6px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.85em;
-        }
-
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
+        /* ----- LEGEND ----- */
+        .legend { display: flex; flex-wrap: wrap; gap: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.85em; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
         .legend-dot.own { background: #0066cc; }
         .legend-dot.safe { background: #28a745; }
         .legend-dot.warning { background: #ffc107; }
         .legend-dot.danger { background: #dc3545; }
 
-        /* ----- CENTER SECTION (Radar + Controls) ----- */
-        .center {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #f5f5f5;
-        }
-
-        /* Radar display area */
-        .radar {
-            flex: 1;
-            position: relative;
-            min-height: 400px;
-        }
-
-        #radarCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            cursor: grab;
-        }
-
-        #radarCanvas:active {
-            cursor: grabbing;
-        }
-
-        /* Zoom controls overlay */
-        .zoom-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
+        /* ----- RADAR ----- */
+        .radar { flex: 1; position: relative; min-height: 400px; }
+        #radarCanvas { position: absolute; top: 0; left: 0; cursor: grab; }
+        #radarCanvas:active { cursor: grabbing; }
+        .zoom-controls { position: absolute; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 5px; }
         .zoom-controls button {
-            width: 36px;
-            height: 36px;
-            border: none;
-            background: white;
-            border-radius: 6px;
-            font-size: 1.3em;
-            cursor: pointer;
+            width: 36px; height: 36px; border: none; background: white;
+            border-radius: 6px; font-size: 1.3em; cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        .zoom-controls button:hover {
-            background: #f0f0f0;
-        }
-
-        .zoom-level {
-            text-align: center;
-            font-size: 0.8em;
-            color: #666;
-        }
-
-        /* Compass in top right */
-        .compass {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-        }
-
-        /* Scale bar in bottom right */
+        .zoom-controls button:hover { background: #f0f0f0; }
+        .zoom-level { text-align: center; font-size: 0.8em; color: #666; }
+        .compass { position: absolute; top: 20px; right: 20px; width: 60px; height: 60px; }
         .scale-bar {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.85em;
+            position: absolute; bottom: 20px; right: 20px; background: white;
+            padding: 8px 12px; border-radius: 6px; font-size: 0.85em;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* ----- CONTROL BAR (Bottom) ----- */
+        /* ----- CONTROLS ----- */
         .controls {
-            background: white;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            border-top: 1px solid #ddd;
+            background: white; padding: 12px 20px; display: flex;
+            align-items: center; gap: 20px; flex-wrap: wrap; border-top: 1px solid #ddd;
         }
-
-        .controls h3 {
-            font-size: 0.8em;
-            color: #666;
-            text-transform: uppercase;
-        }
-
-        /* Button group */
-        .btn-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        /* Base button style */
+        .controls h3 { font-size: 0.8em; color: #666; text-transform: uppercase; }
+        .btn-group { display: flex; gap: 8px; }
         .btn {
-            padding: 8px 14px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background 0.2s;
+            padding: 8px 14px; border: 1px solid #ddd; border-radius: 6px;
+            background: white; cursor: pointer; font-size: 0.9em; transition: background 0.2s;
         }
+        .btn:hover { background: #f0f0f0; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background: #0066cc; border-color: #0066cc; color: white; }
+        .btn-primary:hover { background: #0055aa; }
+        .btn-danger { background: #dc3545; border-color: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-small { padding: 5px 10px; font-size: 0.8em; }
+        .speed-control { display: flex; align-items: center; gap: 10px; }
+        .speed-control input[type="range"] { width: 100px; }
+        .step-control { display: flex; align-items: center; gap: 8px; }
+        .step-input { width: 60px; padding: 6px; border: 1px solid #ddd; border-radius: 4px; text-align: center; }
+        .add-target { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+        .add-target input { width: 55px; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85em; }
+        .add-target input[type="text"] { width: 50px; }
+        .separator { width: 1px; height: 30px; background: #ddd; }
 
-        .btn:hover {
-            background: #f0f0f0;
-        }
+        /* ----- SCROLLBAR ----- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f5f5f5; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-primary {
-            background: #0066cc;
-            border-color: #0066cc;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0055aa;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            border-color: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .btn-small {
-            padding: 5px 10px;
-            font-size: 0.8em;
-        }
-
-        /* Speed slider */
-        .speed-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .speed-control input[type="range"] {
-            width: 100px;
-        }
-
-        /* Step controls */
-        .step-control {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .step-input {
-            width: 60px;
-            padding: 6px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        /* Add target form */
-        .add-target {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-left: auto;
-        }
-
-        .add-target input {
-            width: 55px;
-            padding: 6px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.85em;
-        }
-
-        .add-target input[type="text"] {
-            width: 50px;
-        }
-
-        /* Separator line */
-        .separator {
-            width: 1px;
-            height: 30px;
-            background: #ddd;
-        }
-
-        /* ----- SCROLLBAR STYLING ----- */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f5f5f5;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
-        }
-
-        /* ----- RESPONSIVE DESIGN ----- */
+        /* ----- RESPONSIVE ----- */
         @media (max-width: 900px) {
-            .main {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                max-height: 250px;
-                border-right: none;
-                border-bottom: 1px solid #ddd;
-            }
-
-            .controls {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .add-target {
-                margin-left: 0;
-            }
+            .main { flex-direction: column; }
+            .sidebar { width: 100%; max-height: 250px; border-right: none; border-bottom: 1px solid #ddd; }
+            .controls { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .add-target { margin-left: 0; }
         }
     </style>
 </head>
 
 <body>
-    <!-- ========================================
-         HEADER
-         Shows title and connection status
-    ======================================== -->
+    <!-- HEADER -->
     <header>
         <h1>Situational Awareness System</h1>
         <div class="status">
@@ -469,16 +166,10 @@
         </div>
     </header>
 
-    <!-- ========================================
-         MAIN CONTENT
-         Split into sidebar and center section
-    ======================================== -->
+    <!-- MAIN CONTENT -->
     <div class="main">
-        
-        <!-- LEFT SIDEBAR: Shows vessel info, alerts, targets -->
+        <!-- SIDEBAR -->
         <div class="sidebar">
-            
-            <!-- Own Vessel Information -->
             <h2>Own Vessel</h2>
             <div class="info-box">
                 <div class="info-row">
@@ -495,56 +186,35 @@
                 </div>
             </div>
 
-            <!-- Active Alerts -->
             <h2>⚠ Active Alerts</h2>
             <div class="alert-list" id="alertList">
                 <p style="color: #999; text-align: center; padding: 20px;">No active alerts</p>
             </div>
 
-            <!-- Target Vessels List -->
             <h2>Target Vessels</h2>
             <div class="target-list" id="targetList">
                 <p style="color: #999; text-align: center; padding: 10px;">No targets</p>
             </div>
 
-            <!-- Color Legend -->
             <h2>Legend</h2>
             <div class="legend">
-                <div class="legend-item">
-                    <span class="legend-dot own"></span>
-                    <span>Own</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot safe"></span>
-                    <span>Safe</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot warning"></span>
-                    <span>Warning</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot danger"></span>
-                    <span>Danger</span>
-                </div>
+                <div class="legend-item"><span class="legend-dot own"></span><span>Own</span></div>
+                <div class="legend-item"><span class="legend-dot safe"></span><span>Safe</span></div>
+                <div class="legend-item"><span class="legend-dot warning"></span><span>Warning</span></div>
+                <div class="legend-item"><span class="legend-dot danger"></span><span>Danger</span></div>
             </div>
         </div>
 
-        <!-- CENTER: Radar display and controls -->
+        <!-- CENTER -->
         <div class="center">
-            
-            <!-- Radar Display -->
             <div class="radar" id="radarContainer">
                 <canvas id="radarCanvas"></canvas>
-
-                <!-- Zoom buttons (bottom-left) -->
                 <div class="zoom-controls">
                     <button id="zoomIn" title="Zoom In">+</button>
                     <div class="zoom-level" id="zoomLevel">1.0x</div>
                     <button id="zoomOut" title="Zoom Out">−</button>
                     <button id="resetView" title="Reset View" style="font-size: 1em;">⟲</button>
                 </div>
-
-                <!-- Compass (top-right) -->
                 <svg class="compass" viewBox="0 0 100 100">
                     <circle cx="50" cy="50" r="45" fill="none" stroke="#ddd" stroke-width="2"/>
                     <text x="50" y="18" text-anchor="middle" fill="#0066cc" font-size="14" font-weight="bold">N</text>
@@ -552,41 +222,27 @@
                     <text x="50" y="92" text-anchor="middle" fill="#999" font-size="11">S</text>
                     <text x="12" y="54" text-anchor="middle" fill="#999" font-size="11">W</text>
                 </svg>
-
-                <!-- Scale bar (bottom-right) -->
-                <div class="scale-bar">
-                    <span id="scaleValue">1 nm</span>
-                </div>
+                <div class="scale-bar"><span id="scaleValue">1 nm</span></div>
             </div>
 
-            <!-- Control Bar -->
             <div class="controls">
                 <h3>Simulation</h3>
-
-                <!-- Start/Pause/Reset buttons -->
                 <div class="btn-group">
                     <button id="btnStart" class="btn btn-primary">▶ Start</button>
                     <button id="btnPause" class="btn" disabled>⏸ Pause</button>
                     <button id="btnReset" class="btn btn-danger">↺ Reset</button>
                 </div>
-
-                <!-- Step controls -->
                 <div class="step-control">
                     <button id="btnStep" class="btn">Step</button>
                     <input type="number" id="stepDt" class="step-input" value="0.1" min="0.01" max="1" step="0.01">
                     <span style="color: #888; font-size: 0.85em;">hrs</span>
                 </div>
-
-                <!-- Speed slider -->
                 <div class="speed-control">
                     <span style="color: #666;">Speed:</span>
                     <input type="range" id="speedSlider" min="0.1" max="10" step="0.1" value="1">
                     <span id="speedValue">1.0x</span>
                 </div>
-
                 <div class="separator"></div>
-
-                <!-- Add target form -->
                 <div class="add-target">
                     <span style="color: #0066cc; font-weight: 600;">Add Target:</span>
                     <input type="text" id="newTargetId" placeholder="ID">
@@ -601,482 +257,427 @@
     </div>
 
     <!-- ========================================
-         JAVASCRIPT
-         All the logic for the application
+         JAVASCRIPT - Object-Oriented Design
     ======================================== -->
     <script>
-        // ============================================
-        // CONFIGURATION
-        // Settings that control how the app works
-        // ============================================
-        
-        const SERVER_URL = 'ws://localhost:8765';  // WebSocket server address
-        const UPDATE_INTERVAL = 100;               // How often to update (milliseconds)
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    const CONFIG = {
+        serverUrl: 'ws://localhost:8765',
+        updateInterval: 100,
+        defaultZoom: 50,
+        minZoom: 10,
+        maxZoom: 200
+    };
 
-        // Colors used in the radar display
-        const COLORS = {
-            own: '#0066cc',        // Blue for own vessel
-            safe: '#28a745',       // Green for safe targets
-            warning: '#e6a000',    // Orange for warning targets
-            danger: '#dc3545',     // Red for danger targets
-            grid: '#d0d0d0',       // Light gray grid lines
-            gridMajor: '#b0b0b0',  // Darker grid for major lines
-            background: '#f5f5f5', // Light background
-            text: '#666666'        // Dark gray text
-        };
-
-
-        // ============================================
-        // APPLICATION STATE
-        // Variables that track the current state
-        // ============================================
-
-        let websocket = null;         // Connection to server
-        let isConnected = false;      // Are we connected to server?
-        let isRunning = false;        // Is simulation running?
-        let simulationSpeed = 1.0;    // Speed multiplier
-        let updateTimer = null;       // Timer for auto-updates
-
-        // Radar view settings
-        let zoom = 50;                // Pixels per nautical mile
-        let panX = 0;                 // Horizontal pan offset
-        let panY = 0;                 // Vertical pan offset
-        let isDragging = false;       // Is user dragging the radar?
-        let dragStartX = 0;           // Where drag started (X)
-        let dragStartY = 0;           // Where drag started (Y)
-
-        // Current world data from server
-        let world = {
-            own: null,      // Own vessel data
-            targets: [],    // List of target vessels
-            alerts: []      // List of active alerts
-        };
+    const COLORS = {
+        own: '#0066cc',
+        safe: '#28a745',
+        warning: '#e6a000',
+        danger: '#dc3545',
+        grid: '#d0d0d0',
+        gridMajor: '#b0b0b0',
+        background: '#f5f5f5',
+        text: '#666666'
+    };
 
 
-        // ============================================
-        // GET HTML ELEMENTS
-        // References to important elements on the page
-        // ============================================
+    // ============================================
+    // CONNECTION CLASS
+    // Manages WebSocket connection to server
+    // ============================================
+    class Connection {
+        constructor(url, onMessage) {
+            this.url = url;
+            this.onMessage = onMessage;
+            this.socket = null;
+            this.isConnected = false;
+            
+            // DOM elements for status display
+            this.statusDot = document.getElementById('statusDot');
+            this.statusText = document.getElementById('connectionText');
+        }
 
-        // Canvas for radar display
-        const canvas = document.getElementById('radarCanvas');
-        const ctx = canvas.getContext('2d');
-        const container = document.getElementById('radarContainer');
+        connect() {
+            this.socket = new WebSocket(this.url);
 
-        // Connection status
-        const statusDot = document.getElementById('statusDot');
-        const connectionText = document.getElementById('connectionText');
-
-        // Simulation control buttons
-        const btnStart = document.getElementById('btnStart');
-        const btnPause = document.getElementById('btnPause');
-        const btnReset = document.getElementById('btnReset');
-        const btnStep = document.getElementById('btnStep');
-        const stepDtInput = document.getElementById('stepDt');
-        const speedSlider = document.getElementById('speedSlider');
-        const speedValue = document.getElementById('speedValue');
-
-        // Zoom controls
-        const zoomInBtn = document.getElementById('zoomIn');
-        const zoomOutBtn = document.getElementById('zoomOut');
-        const resetViewBtn = document.getElementById('resetView');
-        const zoomLevelDisplay = document.getElementById('zoomLevel');
-        const scaleValueDisplay = document.getElementById('scaleValue');
-
-        // Own vessel info displays
-        const ownPositionDisplay = document.getElementById('ownPosition');
-        const ownSpeedDisplay = document.getElementById('ownSpeed');
-        const ownHeadingDisplay = document.getElementById('ownHeading');
-
-        // Lists
-        const alertList = document.getElementById('alertList');
-        const targetList = document.getElementById('targetList');
-
-        // Add target form inputs
-        const newTargetId = document.getElementById('newTargetId');
-        const newTargetX = document.getElementById('newTargetX');
-        const newTargetY = document.getElementById('newTargetY');
-        const newTargetSpeed = document.getElementById('newTargetSpeed');
-        const newTargetHeading = document.getElementById('newTargetHeading');
-        const btnAddTarget = document.getElementById('btnAddTarget');
-
-
-        // ============================================
-        // WEBSOCKET CONNECTION
-        // Functions to connect and communicate with server
-        // ============================================
-
-        /**
-         * Connect to the WebSocket server
-         */
-        function connectToServer() {
-            websocket = new WebSocket(SERVER_URL);
-
-            // When connection opens
-            websocket.onopen = function() {
-                isConnected = true;
-                updateConnectionStatus();
+            this.socket.onopen = () => {
+                this.isConnected = true;
+                this.updateStatus();
                 console.log('Connected to server');
-                // Get initial state
-                sendCommand({ command: 'step', dt: 0 });
+                this.send({ command: 'step', dt: 0 });
             };
 
-            // When connection closes
-            websocket.onclose = function() {
-                isConnected = false;
-                updateConnectionStatus();
-                console.log('Disconnected from server');
-                // Try to reconnect after 2 seconds
-                setTimeout(connectToServer, 2000);
+            this.socket.onclose = () => {
+                this.isConnected = false;
+                this.updateStatus();
+                console.log('Disconnected - reconnecting...');
+                setTimeout(() => this.connect(), 2000);
             };
 
-            // When an error occurs
-            websocket.onerror = function(error) {
+            this.socket.onerror = (error) => {
                 console.error('Connection error:', error);
             };
 
-            // When a message is received from server
-            websocket.onmessage = function(event) {
+            this.socket.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-                    handleServerUpdate(data);
+                    this.onMessage(data);
                 } catch (e) {
-                    console.error('Failed to parse message:', e);
+                    console.error('Parse error:', e);
                 }
             };
         }
 
-        /**
-         * Send a command to the server
-         */
-        function sendCommand(command) {
-            if (websocket && websocket.readyState === WebSocket.OPEN) {
-                websocket.send(JSON.stringify(command));
+        send(command) {
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                this.socket.send(JSON.stringify(command));
             }
         }
 
-        /**
-         * Update the connection status display
-         */
-        function updateConnectionStatus() {
-            if (isConnected) {
-                statusDot.classList.add('connected');
-                connectionText.textContent = 'Connected';
-            } else {
-                statusDot.classList.remove('connected');
-                connectionText.textContent = 'Disconnected';
-            }
+        updateStatus() {
+            this.statusDot.classList.toggle('connected', this.isConnected);
+            this.statusText.textContent = this.isConnected ? 'Connected' : 'Disconnected';
+        }
+    }
+
+
+    // ============================================
+    // SIMULATION CLASS
+    // Controls simulation state and timing
+    // ============================================
+    class Simulation {
+        constructor(connection) {
+            this.connection = connection;
+            this.isRunning = false;
+            this.speed = 1.0;
+            this.timer = null;
+
+            // DOM elements
+            this.btnStart = document.getElementById('btnStart');
+            this.btnPause = document.getElementById('btnPause');
+            this.btnReset = document.getElementById('btnReset');
+            this.btnStep = document.getElementById('btnStep');
+            this.stepInput = document.getElementById('stepDt');
+            this.speedSlider = document.getElementById('speedSlider');
+            this.speedDisplay = document.getElementById('speedValue');
+
+            this.bindEvents();
         }
 
-
-        // ============================================
-        // SIMULATION CONTROL
-        // Functions to start, stop, and control simulation
-        // ============================================
-
-        /**
-         * Start the simulation
-         */
-        function startSimulation() {
-            sendCommand({ command: 'start' });
-            isRunning = true;
-            updateButtons();
-            startAutoUpdate();
+        bindEvents() {
+            this.btnStart.addEventListener('click', () => this.start());
+            this.btnPause.addEventListener('click', () => this.pause());
+            this.btnReset.addEventListener('click', () => this.reset());
+            this.btnStep.addEventListener('click', () => this.step());
+            this.speedSlider.addEventListener('input', (e) => this.setSpeed(parseFloat(e.target.value)));
         }
 
-        /**
-         * Pause the simulation
-         */
-        function pauseSimulation() {
-            sendCommand({ command: 'pause' });
-            isRunning = false;
-            updateButtons();
-            stopAutoUpdate();
+        start() {
+            this.connection.send({ command: 'start' });
+            this.isRunning = true;
+            this.updateButtons();
+            this.startTimer();
         }
 
-        /**
-         * Reset the simulation to initial state
-         */
-        function resetSimulation() {
-            sendCommand({ command: 'reset' });
-            isRunning = false;
-            updateButtons();
-            stopAutoUpdate();
+        pause() {
+            this.connection.send({ command: 'pause' });
+            this.isRunning = false;
+            this.updateButtons();
+            this.stopTimer();
         }
 
-        /**
-         * Step the simulation forward by a specific time
-         */
-        function stepSimulation() {
-            const dt = parseFloat(stepDtInput.value) || 0.1;
-            sendCommand({ command: 'step', dt: dt });
+        reset() {
+            this.connection.send({ command: 'reset' });
+            this.isRunning = false;
+            this.updateButtons();
+            this.stopTimer();
         }
 
-        /**
-         * Change the simulation speed
-         */
-        function setSimulationSpeed(speed) {
-            simulationSpeed = speed;
-            sendCommand({ command: 'speed', value: speed });
-            speedValue.textContent = speed.toFixed(1) + 'x';
+        step() {
+            const dt = parseFloat(this.stepInput.value) || 0.1;
+            this.connection.send({ command: 'step', dt: dt });
         }
 
-        /**
-         * Update button enabled/disabled states
-         */
-        function updateButtons() {
-            btnStart.disabled = isRunning;
-            btnPause.disabled = !isRunning;
+        setSpeed(speed) {
+            this.speed = speed;
+            this.connection.send({ command: 'speed', value: speed });
+            this.speedDisplay.textContent = speed.toFixed(1) + 'x';
         }
 
-        /**
-         * Start automatic updates when simulation is running
-         */
-        function startAutoUpdate() {
-            if (updateTimer) return;  // Already running
-            
-            updateTimer = setInterval(function() {
-                if (isRunning && isConnected) {
-                    // Calculate time step based on speed
-                    const dt = (UPDATE_INTERVAL / 1000 / 3600) * simulationSpeed;
-                    sendCommand({ command: 'step', dt: dt });
+        updateButtons() {
+            this.btnStart.disabled = this.isRunning;
+            this.btnPause.disabled = !this.isRunning;
+        }
+
+        startTimer() {
+            if (this.timer) return;
+            this.timer = setInterval(() => {
+                if (this.isRunning && this.connection.isConnected) {
+                    const dt = (CONFIG.updateInterval / 1000 / 3600) * this.speed;
+                    this.connection.send({ command: 'step', dt: dt });
                 }
-            }, UPDATE_INTERVAL);
+            }, CONFIG.updateInterval);
         }
 
-        /**
-         * Stop automatic updates
-         */
-        function stopAutoUpdate() {
-            if (updateTimer) {
-                clearInterval(updateTimer);
-                updateTimer = null;
+        stopTimer() {
+            if (this.timer) {
+                clearInterval(this.timer);
+                this.timer = null;
             }
         }
+    }
 
 
-        // ============================================
-        // TARGET MANAGEMENT
-        // Functions to add and remove targets
-        // ============================================
+    // ============================================
+    // TARGET MANAGER CLASS
+    // Handles adding and removing targets
+    // ============================================
+    class TargetManager {
+        constructor(connection) {
+            this.connection = connection;
 
-        /**
-         * Add a new target vessel
-         */
-        function addTarget() {
-            // Get values from form
-            const id = newTargetId.value.trim();
-            const x = parseFloat(newTargetX.value);
-            const y = parseFloat(newTargetY.value);
-            const speed = parseFloat(newTargetSpeed.value);
-            const heading = parseFloat(newTargetHeading.value);
+            // Form elements
+            this.inputId = document.getElementById('newTargetId');
+            this.inputX = document.getElementById('newTargetX');
+            this.inputY = document.getElementById('newTargetY');
+            this.inputSpeed = document.getElementById('newTargetSpeed');
+            this.inputHeading = document.getElementById('newTargetHeading');
+            this.btnAdd = document.getElementById('btnAddTarget');
 
-            // Validate inputs
+            this.bindEvents();
+            this.setupEventListeners();
+        }
+
+        bindEvents() {
+            this.btnAdd.addEventListener('click', () => this.add());
+            
+            // Enter key submits form
+            const inputs = [this.inputId, this.inputX, this.inputY, this.inputSpeed, this.inputHeading];
+            inputs.forEach(input => {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.add();
+                });
+            });
+        }
+
+        add() {
+            const id = this.inputId.value.trim();
+            const x = parseFloat(this.inputX.value);
+            const y = parseFloat(this.inputY.value);
+            const speed = parseFloat(this.inputSpeed.value);
+            const heading = parseFloat(this.inputHeading.value);
+
             if (!id || isNaN(x) || isNaN(y) || isNaN(speed) || isNaN(heading)) {
                 alert('Please fill in all fields with valid values');
                 return;
             }
 
-            // Send command to server
-            sendCommand({
+            this.connection.send({
                 command: 'add_target',
-                id: id,
-                x: x,
-                y: y,
-                speed: speed,
-                heading: heading
+                id, x, y, speed, heading
             });
 
-            // Clear the form
-            newTargetId.value = '';
-            newTargetX.value = '';
-            newTargetY.value = '';
-            newTargetSpeed.value = '';
-            newTargetHeading.value = '';
+            this.clearForm();
         }
 
-        /**
-         * Remove a target vessel
-         */
-        function removeTarget(targetId) {
-            sendCommand({ command: 'remove_target', id: targetId });
+        remove(targetId) {
+            this.connection.send({ command: 'remove_target', id: targetId });
         }
 
-
-        // ============================================
-        // UPDATE DISPLAYS
-        // Functions to update the UI with new data
-        // ============================================
-
-        /**
-         * Handle data received from the server
-         */
-        function handleServerUpdate(data) {
-            world = data;
-            updateOwnVesselDisplay();
-            updateAlertDisplay();
-            updateTargetDisplay();
-            drawRadar();
+        clearForm() {
+            this.inputId.value = '';
+            this.inputX.value = '';
+            this.inputY.value = '';
+            this.inputSpeed.value = '';
+            this.inputHeading.value = '';
         }
 
-        /**
-         * Update the own vessel information display
-         */
-        function updateOwnVesselDisplay() {
-            if (!world.own) return;
-
-            const own = world.own;
-            ownPositionDisplay.textContent = 
-                `(${own.position.x.toFixed(2)}, ${own.position.y.toFixed(2)}) nm`;
-            ownSpeedDisplay.textContent = `${own.speed_knots.toFixed(1)} kn`;
-            ownHeadingDisplay.textContent = `${own.heading_deg.toFixed(1)}°`;
-        }
-
-        /**
-         * Update the alerts list display
-         */
-        function updateAlertDisplay() {
-            // If no alerts, show placeholder message
-            if (!world.alerts || world.alerts.length === 0) {
-                alertList.innerHTML = 
-                    '<p style="color: #999; text-align: center; padding: 20px;">No active alerts</p>';
-                return;
-            }
-
-            // Build HTML for each alert
-            let html = '';
-            for (const alert of world.alerts) {
-                const risk = alert.risk.toLowerCase();
-                
-                // Format CPA text
-                let cpaText = 'No CPA';
-                if (alert.cpa_nm !== null) {
-                    cpaText = `CPA: ${alert.cpa_nm.toFixed(2)} nm`;
+        // ----------------------------------------
+        // Event delegation for remove buttons
+        // Called once to handle all dynamically created buttons
+        // ----------------------------------------
+        setupEventListeners() {
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('.remove-target-btn')) {
+                    const targetId = e.target.dataset.targetId;
+                    this.remove(targetId);
                 }
+            });
+        }
+    }
 
-                // Format TCPA text
-                let tcpaText = '';
-                if (alert.tcpa_hours !== null) {
-                    if (alert.tcpa_hours >= 0) {
-                        tcpaText = `TCPA: ${(alert.tcpa_hours * 60).toFixed(1)} min`;
-                    } else {
-                        tcpaText = 'Opening';
-                    }
-                }
 
-                html += `
-                    <div class="alert ${risk}">
-                        <div class="alert-header">
-                            <span class="alert-target">Target ${alert.target_id}</span>
-                            <span class="alert-badge ${risk}">${alert.risk}</span>
-                        </div>
-                        <div class="alert-details">
-                            ${cpaText}${tcpaText ? ' • ' + tcpaText : ''}
-                        </div>
-                    </div>
-                `;
-            }
+    // ============================================
+    // VIEWPORT CLASS
+    // Handles zoom and pan for radar view
+    // ============================================
+    class Viewport {
+        constructor(canvas, onUpdate) {
+            this.canvas = canvas;
+            this.onUpdate = onUpdate;
+            
+            this.zoom = CONFIG.defaultZoom;
+            this.panX = 0;
+            this.panY = 0;
+            this.isDragging = false;
+            this.dragStartX = 0;
+            this.dragStartY = 0;
 
-            alertList.innerHTML = html;
+            // DOM elements
+            this.zoomDisplay = document.getElementById('zoomLevel');
+            this.scaleDisplay = document.getElementById('scaleValue');
+            this.btnZoomIn = document.getElementById('zoomIn');
+            this.btnZoomOut = document.getElementById('zoomOut');
+            this.btnReset = document.getElementById('resetView');
+
+            this.bindEvents();
         }
 
-        /**
-         * Update the targets list display
-         */
-        function updateTargetDisplay() {
-            // If no targets, show placeholder message
-            if (!world.targets || world.targets.length === 0) {
-                targetList.innerHTML = 
-                    '<p style="color: #999; text-align: center; padding: 10px;">No targets</p>';
-                return;
-            }
+        bindEvents() {
+            // Zoom buttons
+            this.btnZoomIn.addEventListener('click', () => this.zoomBy(2));
+            this.btnZoomOut.addEventListener('click', () => this.zoomBy(-2));
+            this.btnReset.addEventListener('click', () => this.reset());
 
-            // Build HTML for each target
-            let html = '';
-            for (const target of world.targets) {
-                html += `
-                    <div class="target">
-                        <div>
-                            <span class="target-id">${target.id}</span>
-                            <span style="color: #666; margin-left: 10px;">
-                                ${target.speed_knots.toFixed(1)} kn @ ${target.heading_deg.toFixed(0)}°
-                            </span>
-                        </div>
-                        <button class="btn btn-danger btn-small" onclick="removeTarget('${target.id}')">✕</button>
-                    </div>
-                `;
-            }
+            // Mouse wheel zoom
+            this.canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                this.zoomBy(e.deltaY > 0 ? -1 : 1);
+            });
 
-            targetList.innerHTML = html;
+            // Mouse drag to pan
+            this.canvas.addEventListener('mousedown', (e) => {
+                this.isDragging = true;
+                this.dragStartX = e.clientX - this.panX;
+                this.dragStartY = e.clientY - this.panY;
+                this.canvas.style.cursor = 'grabbing';
+            });
+
+            this.canvas.addEventListener('mousemove', (e) => {
+                if (!this.isDragging) return;
+                this.panX = e.clientX - this.dragStartX;
+                this.panY = e.clientY - this.dragStartY;
+                this.onUpdate();
+            });
+
+            this.canvas.addEventListener('mouseup', () => this.stopDrag());
+            this.canvas.addEventListener('mouseleave', () => this.stopDrag());
         }
 
-
-        // ============================================
-        // RADAR DRAWING
-        // Functions to draw the radar display
-        // ============================================
-
-        /**
-         * Resize the canvas to fit the container
-         */
-        function resizeCanvas() {
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            drawRadar();
+        zoomBy(delta) {
+            this.zoom = Math.max(CONFIG.minZoom, Math.min(CONFIG.maxZoom, this.zoom * (1 + delta * 0.1)));
+            this.updateDisplay();
+            this.onUpdate();
         }
 
-        /**
-         * Main function to draw the radar display
-         */
-        function drawRadar() {
-            const width = canvas.width;
-            const height = canvas.height;
+        reset() {
+            this.zoom = CONFIG.defaultZoom;
+            this.panX = 0;
+            this.panY = 0;
+            this.updateDisplay();
+            this.onUpdate();
+        }
 
-            // Calculate center position (own vessel at center)
+        stopDrag() {
+            this.isDragging = false;
+            this.canvas.style.cursor = 'grab';
+        }
+
+        updateDisplay() {
+            this.zoomDisplay.textContent = (this.zoom / CONFIG.defaultZoom).toFixed(1) + 'x';
+        }
+
+        updateScaleBar() {
+            const distanceNm = 100 / this.zoom;
+            let text;
+            if (distanceNm >= 5) {
+                text = `${Math.round(distanceNm / 5) * 5} nm`;
+            } else if (distanceNm >= 1) {
+                text = `${Math.round(distanceNm)} nm`;
+            } else {
+                text = `${distanceNm.toFixed(1)} nm`;
+            }
+            this.scaleDisplay.textContent = text;
+        }
+    }
+
+
+    // ============================================
+    // RADAR RENDERER CLASS
+    // Draws the radar display on canvas
+    // ============================================
+    class RadarRenderer {
+        constructor(canvas, viewport) {
+            this.canvas = canvas;
+            this.ctx = canvas.getContext('2d');
+            this.viewport = viewport;
+            this.container = document.getElementById('radarContainer');
+            
+            window.addEventListener('resize', () => this.resize());
+            this.resize();
+        }
+
+        resize() {
+            this.canvas.width = this.container.clientWidth;
+            this.canvas.height = this.container.clientHeight;
+        }
+
+        render(world) {
+            const width = this.canvas.width;
+            const height = this.canvas.height;
+            const zoom = this.viewport.zoom;
+            const panX = this.viewport.panX;
+            const panY = this.viewport.panY;
+
+            // Calculate center (own vessel position)
             const ownOffsetX = world.own ? world.own.position.x * zoom : 0;
             const ownOffsetY = world.own ? world.own.position.y * zoom : 0;
             const centerX = width / 2 + panX - ownOffsetX;
             const centerY = height / 2 + panY + ownOffsetY;
+            const viewCenterX = width / 2 + panX;
+            const viewCenterY = height / 2 + panY;
 
-            // Clear the canvas
-            ctx.fillStyle = COLORS.background;
-            ctx.fillRect(0, 0, width, height);
+            // Clear canvas
+            this.ctx.fillStyle = COLORS.background;
+            this.ctx.fillRect(0, 0, width, height);
 
-            // Draw the grid
-            drawGrid(width / 2 + panX, height / 2 + panY, width, height);
+            // Draw layers
+            this.drawGrid(viewCenterX, viewCenterY, width, height);
+            this.drawRangeRings(viewCenterX, viewCenterY);
 
-            // Draw range rings around own vessel
-            drawRangeRings(width / 2 + panX, height / 2 + panY);
-
-            // Draw all target vessels
+            // Draw vessels
             if (world.targets) {
-                for (const target of world.targets) {
-                    drawVessel(target, centerX, centerY, false);
-                }
+                world.targets.forEach(t => this.drawVessel(t, centerX, centerY, false));
             }
-
-            // Draw own vessel (on top)
             if (world.own) {
-                drawVessel(world.own, centerX, centerY, true);
+                this.drawVessel(world.own, centerX, centerY, true);
             }
 
-            // Update scale bar display
-            updateScaleBar();
+            this.viewport.updateScaleBar();
         }
 
-        /**
-         * Draw the grid lines
-         */
-        function drawGrid(centerX, centerY, width, height) {
-            const gridSpacing = zoom;  // 1 nautical mile spacing
+        drawGrid(centerX, centerY, width, height) {
+            const zoom = this.viewport.zoom;
+            const ctx = this.ctx;
 
-            // Draw minor grid lines
+            // Minor grid (1 nm)
             ctx.strokeStyle = COLORS.grid;
             ctx.lineWidth = 0.5;
+            this.drawGridLines(centerX, centerY, width, height, zoom);
+
+            // Major grid (5 nm)
+            ctx.strokeStyle = COLORS.gridMajor;
+            ctx.lineWidth = 1;
+            this.drawGridLines(centerX, centerY, width, height, zoom * 5);
+        }
+
+        drawGridLines(centerX, centerY, width, height, spacing) {
+            const ctx = this.ctx;
 
             // Vertical lines
-            const startX = centerX % gridSpacing;
-            for (let x = startX; x < width; x += gridSpacing) {
+            for (let x = centerX % spacing; x < width; x += spacing) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, height);
@@ -1084,29 +685,7 @@
             }
 
             // Horizontal lines
-            const startY = centerY % gridSpacing;
-            for (let y = startY; y < height; y += gridSpacing) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(width, y);
-                ctx.stroke();
-            }
-
-            // Draw major grid lines (every 5 nm)
-            ctx.strokeStyle = COLORS.gridMajor;
-            ctx.lineWidth = 1;
-
-            const majorSpacing = zoom * 5;
-            const majorStartX = centerX % majorSpacing;
-            for (let x = majorStartX; x < width; x += majorSpacing) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, height);
-                ctx.stroke();
-            }
-
-            const majorStartY = centerY % majorSpacing;
-            for (let y = majorStartY; y < height; y += majorSpacing) {
+            for (let y = centerY % spacing; y < height; y += spacing) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(width, y);
@@ -1114,58 +693,50 @@
             }
         }
 
-        /**
-         * Draw range rings around own vessel
-         */
-        function drawRangeRings(centerX, centerY) {
+        drawRangeRings(centerX, centerY) {
+            const ctx = this.ctx;
+            const zoom = this.viewport.zoom;
+
             ctx.strokeStyle = COLORS.gridMajor;
             ctx.lineWidth = 1;
-            ctx.setLineDash([5, 5]);  // Dashed line
+            ctx.setLineDash([5, 5]);
 
-            // Draw rings at 1, 2, 5, and 10 nautical miles
-            const ranges = [1, 2, 5, 10];
-            for (const range of ranges) {
+            [1, 2, 5, 10].forEach(range => {
                 const radius = range * zoom;
-                
-                // Draw the circle
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
                 ctx.stroke();
 
-                // Draw the label
                 ctx.fillStyle = COLORS.text;
                 ctx.font = '11px sans-serif';
                 ctx.fillText(`${range} nm`, centerX + radius + 5, centerY);
-            }
+            });
 
-            ctx.setLineDash([]);  // Reset to solid line
+            ctx.setLineDash([]);
         }
 
-        /**
-         * Draw a vessel on the radar
-         */
-        function drawVessel(vessel, centerX, centerY, isOwn) {
-            // Calculate screen position
-            const x = centerX + vessel.position.x * zoom;
-            const y = centerY - vessel.position.y * zoom;  // Invert Y for screen
+        drawVessel(vessel, centerX, centerY, isOwn) {
+            const ctx = this.ctx;
+            const zoom = this.viewport.zoom;
 
-            // Determine color based on risk level
+            // Position
+            const x = centerX + vessel.position.x * zoom;
+            const y = centerY - vessel.position.y * zoom;
+
+            // Color based on risk
             let color = COLORS.safe;
             if (isOwn) {
                 color = COLORS.own;
             } else if (vessel.alert) {
-                if (vessel.alert.risk === 'DANGER') {
-                    color = COLORS.danger;
-                } else if (vessel.alert.risk === 'WARNING') {
-                    color = COLORS.warning;
-                }
+                color = vessel.alert.risk === 'DANGER' ? COLORS.danger :
+                        vessel.alert.risk === 'WARNING' ? COLORS.warning : COLORS.safe;
             }
 
-            // Draw velocity vector (line showing direction/speed)
+            // Velocity vector
             const headingRad = vessel.heading_deg * Math.PI / 180;
-            const vectorLength = vessel.speed_knots * zoom * 0.1;
-            const vx = Math.sin(headingRad) * vectorLength;
-            const vy = -Math.cos(headingRad) * vectorLength;
+            const vectorLen = vessel.speed_knots * zoom * 0.1;
+            const vx = Math.sin(headingRad) * vectorLen;
+            const vy = -Math.cos(headingRad) * vectorLen;
 
             ctx.strokeStyle = 'rgba(0,0,0,0.3)';
             ctx.lineWidth = 2;
@@ -1174,29 +745,18 @@
             ctx.lineTo(x + vx, y + vy);
             ctx.stroke();
 
-            // Draw vessel shape (triangle)
+            // Vessel shape
             const size = isOwn ? 14 : 10;
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate(headingRad);
 
-            // Draw warning/danger pulse effect
-            if (!isOwn && vessel.alert && 
-                (vessel.alert.risk === 'DANGER' || vessel.alert.risk === 'WARNING')) {
-                const pulseRadius = size + 8 + Math.sin(Date.now() / 200) * 4;
-                ctx.beginPath();
-                ctx.arc(0, 0, pulseRadius, 0, Math.PI * 2);
-                ctx.fillStyle = color + '33';  // Transparent version
-                ctx.fill();
-            }
-
-            // Draw the triangle
+            // Triangle
             ctx.beginPath();
-            ctx.moveTo(0, -size);           // Top point
-            ctx.lineTo(-size * 0.6, size * 0.6);  // Bottom left
-            ctx.lineTo(size * 0.6, size * 0.6);   // Bottom right
+            ctx.moveTo(0, -size);
+            ctx.lineTo(-size * 0.6, size * 0.6);
+            ctx.lineTo(size * 0.6, size * 0.6);
             ctx.closePath();
-
             ctx.fillStyle = color;
             ctx.fill();
             ctx.strokeStyle = 'white';
@@ -1205,155 +765,140 @@
 
             ctx.restore();
 
-            // Draw vessel ID label
+            // Label
             ctx.fillStyle = '#333';
             ctx.font = 'bold 11px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText(vessel.id, x, y + size + 14);
 
-            // Draw CPA/TCPA info for warning/danger targets
+            // Alert info
             if (!isOwn && vessel.alert && vessel.alert.risk !== 'SAFE') {
                 ctx.font = '9px sans-serif';
                 ctx.fillStyle = color;
-                const infoText = vessel.alert.text || '';
-                ctx.fillText(infoText, x, y + size + 26);
+                ctx.fillText(vessel.alert.text || '', x, y + size + 26);
             }
         }
+    }
 
-        /**
-         * Update the scale bar display
-         */
-        function updateScaleBar() {
-            const distanceNm = 100 / zoom;
-            let displayValue;
 
-            if (distanceNm >= 5) {
-                displayValue = `${Math.round(distanceNm / 5) * 5} nm`;
-            } else if (distanceNm >= 1) {
-                displayValue = `${Math.round(distanceNm)} nm`;
-            } else {
-                displayValue = `${distanceNm.toFixed(1)} nm`;
+    // ============================================
+    // UI UPDATER CLASS
+    // Updates sidebar displays
+    // ============================================
+    class UIUpdater {
+        constructor() {
+            this.ownPosition = document.getElementById('ownPosition');
+            this.ownSpeed = document.getElementById('ownSpeed');
+            this.ownHeading = document.getElementById('ownHeading');
+            this.alertList = document.getElementById('alertList');
+            this.targetList = document.getElementById('targetList');
+        }
+
+        update(world) {
+            this.updateOwnVessel(world.own);
+            this.updateAlerts(world.alerts);
+            this.updateTargets(world.targets);
+        }
+
+        updateOwnVessel(own) {
+            if (!own) return;
+            this.ownPosition.textContent = `(${own.position.x.toFixed(2)}, ${own.position.y.toFixed(2)}) nm`;
+            this.ownSpeed.textContent = `${own.speed_knots.toFixed(1)} kn`;
+            this.ownHeading.textContent = `${own.heading_deg.toFixed(1)}°`;
+        }
+
+        updateAlerts(alerts) {
+            if (!alerts || alerts.length === 0) {
+                this.alertList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No active alerts</p>';
+                return;
             }
 
-            scaleValueDisplay.textContent = displayValue;
+            this.alertList.innerHTML = alerts.map(alert => {
+                const risk = alert.risk.toLowerCase();
+                const cpa = alert.cpa_nm !== null ? `CPA: ${alert.cpa_nm.toFixed(2)} nm` : 'No CPA';
+                let tcpa = '';
+                if (alert.tcpa_hours !== null) {
+                    tcpa = alert.tcpa_hours >= 0 
+                        ? `TCPA: ${(alert.tcpa_hours * 60).toFixed(1)} min` 
+                        : 'Opening';
+                }
+
+                return `
+                    <div class="alert ${risk}">
+                        <div class="alert-header">
+                            <span class="alert-target">Target ${alert.target_id}</span>
+                            <span class="alert-badge ${risk}">${alert.risk}</span>
+                        </div>
+                        <div class="alert-details">${cpa}${tcpa ? ' • ' + tcpa : ''}</div>
+                    </div>
+                `;
+            }).join('');
         }
 
-
-        // ============================================
-        // ZOOM AND PAN
-        // Functions to control the radar view
-        // ============================================
-
-        /**
-         * Zoom in or out
-         */
-        function handleZoom(direction) {
-            zoom = Math.max(10, Math.min(200, zoom * (1 + direction * 0.1)));
-            zoomLevelDisplay.textContent = (zoom / 50).toFixed(1) + 'x';
-            drawRadar();
-        }
-
-        /**
-         * Reset view to default
-         */
-        function resetView() {
-            zoom = 50;
-            panX = 0;
-            panY = 0;
-            zoomLevelDisplay.textContent = '1.0x';
-            drawRadar();
-        }
-
-        // Mouse wheel zoom
-        canvas.addEventListener('wheel', function(e) {
-            e.preventDefault();
-            handleZoom(e.deltaY > 0 ? -1 : 1);
-        });
-
-        // Mouse drag to pan
-        canvas.addEventListener('mousedown', function(e) {
-            isDragging = true;
-            dragStartX = e.clientX - panX;
-            dragStartY = e.clientY - panY;
-            canvas.style.cursor = 'grabbing';
-        });
-
-        canvas.addEventListener('mousemove', function(e) {
-            if (!isDragging) return;
-            panX = e.clientX - dragStartX;
-            panY = e.clientY - dragStartY;
-            drawRadar();
-        });
-
-        canvas.addEventListener('mouseup', function() {
-            isDragging = false;
-            canvas.style.cursor = 'grab';
-        });
-
-        canvas.addEventListener('mouseleave', function() {
-            isDragging = false;
-            canvas.style.cursor = 'grab';
-        });
-
-
-        // ============================================
-        // EVENT LISTENERS
-        // Connect buttons and inputs to functions
-        // ============================================
-
-        // Zoom buttons
-        zoomInBtn.addEventListener('click', function() { handleZoom(2); });
-        zoomOutBtn.addEventListener('click', function() { handleZoom(-2); });
-        resetViewBtn.addEventListener('click', resetView);
-
-        // Simulation control buttons
-        btnStart.addEventListener('click', startSimulation);
-        btnPause.addEventListener('click', pauseSimulation);
-        btnReset.addEventListener('click', resetSimulation);
-        btnStep.addEventListener('click', stepSimulation);
-
-        // Speed slider
-        speedSlider.addEventListener('input', function(e) {
-            setSimulationSpeed(parseFloat(e.target.value));
-        });
-
-        // Add target button
-        btnAddTarget.addEventListener('click', addTarget);
-
-        // Enter key in add target form
-        [newTargetId, newTargetX, newTargetY, newTargetSpeed, newTargetHeading].forEach(function(input) {
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') addTarget();
-            });
-        });
-
-        // Window resize
-        window.addEventListener('resize', resizeCanvas);
-
-
-        // ============================================
-        // ANIMATION LOOP
-        // For smooth pulse effects on warning/danger targets
-        // ============================================
-
-        function animate() {
-            // Only redraw if there are warning/danger targets
-            if (world.targets && world.targets.some(function(t) {
-                return t.alert && (t.alert.risk === 'DANGER' || t.alert.risk === 'WARNING');
-            })) {
-                drawRadar();
+        updateTargets(targets) {
+            if (!targets || targets.length === 0) {
+                this.targetList.innerHTML = '<p style="color: #999; text-align: center; padding: 10px;">No targets</p>';
+                return;
             }
-            requestAnimationFrame(animate);
+
+            this.targetList.innerHTML = targets.map(t => `
+                <div class="target">
+                    <div>
+                        <span class="target-id">${t.id}</span>
+                        <span style="color: #666; margin-left: 10px;">
+                            (${t.position.x.toFixed(2)}, ${t.position.y.toFixed(2)}) nm
+                        </span>
+                        <span style="color: #888; margin-left: 8px; font-size: 0.85em;">
+                            ${t.speed_knots.toFixed(1)} kn @ ${t.heading_deg.toFixed(0)}°
+                        </span>
+                    </div>
+                    <button class="btn btn-danger btn-small remove-target-btn" data-target-id="${t.id}">✕</button>
+                </div>
+            `).join('');
+        }
+    }
+
+
+    // ============================================
+    // APPLICATION CLASS
+    // Main app that ties everything together
+    // ============================================
+    class Application {
+        constructor() {
+            this.world = { own: null, targets: [], alerts: [] };
+
+            // Initialize components
+            this.connection = new Connection(CONFIG.serverUrl, (data) => this.onServerUpdate(data));
+            this.simulation = new Simulation(this.connection);
+            this.targetManager = new TargetManager(this.connection);
+            
+            const canvas = document.getElementById('radarCanvas');
+            this.viewport = new Viewport(canvas, () => this.render());
+            this.renderer = new RadarRenderer(canvas, this.viewport);
+            this.ui = new UIUpdater();
         }
 
+        start() {
+            this.connection.connect();
+        }
 
-        // ============================================
-        // START THE APPLICATION
-        // ============================================
+        onServerUpdate(data) {
+            this.world = data;
+            this.ui.update(this.world);
+            this.render();
+        }
 
-        resizeCanvas();      // Set up the canvas
-        connectToServer();   // Connect to WebSocket server
-        animate();           // Start animation loop
+        render() {
+            this.renderer.render(this.world);
+        }
+    }
+
+
+    // ============================================
+    // START APPLICATION
+    // ============================================
+    const app = new Application();
+    app.start();
 
     </script>
 </body>
