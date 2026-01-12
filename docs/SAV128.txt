@@ -1,0 +1,655 @@
+Situational Awareness & Collision Risk Assessment System
+
+Candidate ID: SAV178
+Date: January 12, 2026
+
+================================================================================
+2.1 Understanding of the Problem Statement
+================================================================================
+
+After reading the problem statement, I understood that I need to build a system that helps ships avoid collisions. The main goal is to track where vessels are moving and warn if two ships might come too close to each other.
+
+Here is what I understood about the requirements:
+
+Core Problem:
+- We have our own ship and there are other ships (called targets) around us
+- All ships are moving in different directions at different speeds
+- We need to calculate if any target ship will come dangerously close to our ship
+- We need to show warnings to the user so they can take action
+
+Key Calculations Needed:
+- CPA (Closest Point of Approach) - This is the minimum distance between two ships if they keep moving on their current paths
+- TCPA (Time to CPA) - How much time we have before the ships reach their closest point
+
+Risk Levels:
+- DANGER - When ships will come very close (less than 0.5 nautical miles) AND this will happen soon (within 30 minutes)
+- WARNING - When ships will come somewhat close (less than 1.5 nautical miles) AND this will happen within an hour
+- SAFE - When there is no immediate risk (either far apart, or close approach is far in the future)
+
+Constraints I Identified:
+- The system needs to work in real-time
+- Multiple target ships need to be tracked at the same time
+- The user interface should be easy to understand
+- The code should be testable with unit tests
+
+
+================================================================================
+2.2 Approach and Design
+================================================================================
+
+My Overall Approach
+-------------------
+I decided to build this step by step. First I created the basic building blocks, then I added more features one by one. I wrote tests for each part before moving to the next.
+
+
+Design Decisions
+----------------
+
+1. Keeping Things Simple with Separate Files
+
+Instead of putting everything in one big file, I created separate Python files for each main concept:
+- position.py - For handling x,y coordinates
+- vessel.py - For representing ships with their speed and heading
+- motion.py - For calculating velocity from speed and heading
+- cpa.py - For CPA and TCPA calculations
+- risk.py - For deciding if situation is DANGER, WARNING or SAFE
+- alert.py - For creating alert messages
+- world.py - For managing all vessels together
+- simulation.py - For controlling time in the simulation
+- server.py - For handling communication with the browser
+
+This made it easier to test each part separately.
+
+
+2. Using WebSocket for Real-time Updates
+
+I chose WebSocket because it allows the browser and server to talk back and forth quickly. This is important because ship positions change continuously and we need to update the display many times per second.
+
+Why WebSocket instead of other options:
+
+HTTP Polling:
+  How it works: Browser asks server for updates every few seconds
+  Why I didn't use it: Too slow, wastes bandwidth by asking even when nothing changed
+
+Long Polling:
+  How it works: Browser waits for server response, then immediately asks again
+  Why I didn't use it: Better than polling but still one-way, server can't push updates
+
+Server-Sent Events (SSE):
+  How it works: Server pushes updates to browser
+  Why I didn't use it: Only one-way (server to browser), we also need to send commands from browser to server
+
+WebSocket:
+  How it works: Two-way connection stays open, both sides can send anytime
+  Why I chose it: Perfect for our use case
+
+WebSocket was the best choice because:
+- We need to send commands FROM browser TO server (start, pause, add target, etc.)
+- We need to receive updates FROM server TO browser (new positions, alerts)
+- Updates happen 10 times per second, so connection needs to stay open
+- Low latency is important for real-time display
+
+
+3. Single HTML File for Frontend
+
+I put all the HTML, CSS and JavaScript in one index.html file. This keeps things simple and means no build tools are needed.
+
+
+4. Minimal Dependencies
+
+I tried to use as few external libraries as possible. The only external dependency is:
+- websockets (version 16.0 or higher) - for real-time communication
+
+Everything else uses Python's built-in libraries like math, json, and asyncio. This makes the project easy to set up and run.
+
+
+Why I Made These Choices
+------------------------
+- Separate files: Makes it easier to find and fix bugs
+- WebSocket: Better than refreshing the page constantly
+- Single HTML file: No need for complicated build systems
+- Minimal dependencies: Easy to install, fewer things that can break
+
+
+How I Achieved Clarity, Correctness, and Robustness
+----------------------------------------------------
+
+Clarity:
+- Each Python file has a single responsibility (position.py only handles coordinates, risk.py only classifies risk levels, etc.)
+- Functions and classes have descriptive names that explain what they do (e.g., compute_tcpa, classify_risk, generate_alert_text)
+- Code is organized in logical order - first define basic concepts (Position, Vessel), then calculations (CPA, TCPA), then higher-level logic (Risk, Alert, World)
+- Comments explain the "why" not just the "what"
+- Consistent coding style throughout the project
+
+Correctness:
+- Unit tests verify that calculations produce expected results
+- Mathematical formulas are implemented exactly as documented (dot product for TCPA, Euclidean distance for CPA)
+- Edge cases are explicitly handled:
+  - Division by zero when relative velocity is zero
+  - Negative TCPA when vessels are moving apart
+  - Heading normalization to keep values between 0-359 degrees
+- Test cases include known scenarios (head-on collision, parallel courses, crossing situations)
+- Each function does one thing and can be verified independently
+
+Robustness:
+- Input validation prevents invalid values (negative speeds, out-of-range headings)
+- The system handles connection drops gracefully - browser automatically reconnects
+- Server continues running even if one calculation fails
+- UI prevents submission of incomplete forms (all target fields must be filled)
+- Simulation can be paused and reset at any time
+- State is managed centrally in the World class to avoid inconsistencies
+- No hardcoded values - thresholds and configuration are defined in one place
+
+
+================================================================================
+2.3 Solution Explanation
+================================================================================
+
+Development Steps (Based on Commit History)
+--------------------------------------------
+
+I developed this solution in the following order:
+
+
+Step 1: Position and Vector Speed
+
+First I created a Position class to handle x,y coordinates. Then I added functionality to calculate the velocity vector of vessels based on their speed and heading direction.
+
+The velocity components are calculated as:
+  Vx = speed x sin(heading)
+  Vy = speed x cos(heading)
+
+Where heading is measured in degrees from North (0 degrees = North, 90 degrees = East).
+
+
+Step 2: Vessel Movement
+
+I added a step function that updates a vessel's position based on time elapsed. If a ship is moving at 10 knots heading north, after 1 hour it will be 10 nautical miles north of where it started.
+
+The position update formula:
+  X_new = X_old + Vx x dt
+  Y_new = Y_old + Vy x dt
+
+Where dt is the time step in hours.
+
+
+Step 3: Relative Velocity
+
+To find if ships will collide, I needed to calculate the relative velocity between target vessels and our own vessel. This tells us how fast they are approaching each other.
+
+Relative velocity formula:
+  Vrel_x = V_target_x - V_own_x
+  Vrel_y = V_target_y - V_own_y
+
+Similarly, relative position:
+  Prel_x = P_target_x - P_own_x
+  Prel_y = P_target_y - P_own_y
+
+
+Step 4: TCPA Calculation
+
+I implemented the formula to find Time to Closest Point of Approach. This uses dot product of relative position and relative velocity vectors.
+
+TCPA formula:
+  TCPA = -(Prel . Vrel) / |Vrel|^2
+
+Expanded:
+  TCPA = -(Prel_x x Vrel_x + Prel_y x Vrel_y) / (Vrel_x^2 + Vrel_y^2)
+
+If TCPA is negative, it means the closest point has already passed (ships are moving apart).
+
+
+Step 5: CPA Distance
+
+Using the TCPA, I calculate where both ships will be at that time and find the distance between them.
+
+First, project both vessels to their positions at TCPA:
+  Own_x_at_tcpa = Own_x + V_own_x x TCPA
+  Own_y_at_tcpa = Own_y + V_own_y x TCPA
+  Target_x_at_tcpa = Target_x + V_target_x x TCPA
+  Target_y_at_tcpa = Target_y + V_target_y x TCPA
+
+Then calculate distance (CPA):
+  CPA = sqrt[(Target_x_at_tcpa - Own_x_at_tcpa)^2 + (Target_y_at_tcpa - Own_y_at_tcpa)^2]
+
+
+Step 6: Risk Classification
+
+I added logic to classify situations as DANGER, WARNING or SAFE based on both the CPA distance and TCPA time. This is more realistic than just using CPA alone - a close approach that won't happen for hours is less urgent than one happening in minutes.
+
+Risk classification rules:
+- DANGER: CPA <= 0.5 nm AND TCPA <= 0.5 hours (30 minutes)
+- WARNING: CPA <= 1.5 nm AND TCPA <= 1.0 hours (60 minutes)
+- SAFE: Large CPA, or close approach far in the future, or TCPA < 0 (vessels moving apart)
+
+This means a head-on collision 2 hours away is classified as SAFE initially, giving operators time to assess without constant alarms. As the vessels get closer and TCPA drops below the thresholds, the risk level escalates appropriately.
+
+
+Step 7: Multiple Vessels
+
+Extended the alerting to work with multiple target vessels, not just one. The system loops through all targets and calculates CPA/TCPA for each one against our own vessel. Each target gets its own risk level and alert.
+
+
+Step 8: World and Simulation
+
+Created a World class that holds all vessels and can advance time for all of them together. The World class provides:
+- add_target(vessel) - Add a new target vessel
+- remove_target(id) - Remove a target by ID
+- step(dt) - Move all vessels forward by dt hours
+- snapshot() - Get current state with all alerts for UI
+
+Added a Simulation class to control:
+- start() / pause() - Control simulation running state
+- set_speed(multiplier) - Speed up or slow down time (1x to 10x)
+- Timer that sends step commands at regular intervals
+
+
+Step 9: Adding and Removing Targets
+
+Added functionality to add new targets and remove existing ones dynamically.
+
+
+Step 10: Alert Sorting and Text
+
+Implemented sorting of alerts so DANGER appears before WARNING. Added human-readable alert messages like "CPA 0.25 nm in 12 min - DANGER".
+
+
+Step 11: Server and UI
+
+Created the WebSocket server and built the user interface with radar display, controls, and alert panels.
+
+Server handles these commands:
+- start, pause, reset - Simulation control
+- step - Advance time by specified amount
+- speed - Change simulation speed multiplier
+- add_target - Add new target with position, speed, heading
+- remove_target - Remove target by ID
+- update_own_speed, update_own_heading - Change own vessel course
+- update_target_speed, update_target_heading - Change target course
+
+UI Features:
+- Radar display showing all vessels on a grid
+- Vessels colored by risk level (blue=own, green=safe, yellow=warning, red=danger)
+- Velocity vectors showing direction and speed
+- Range rings at 1, 2, 5, 10 nautical miles
+- Zoom in/out and pan controls
+- Alert panel showing sorted warnings
+- Target list with live position updates
+- Controls to add/remove targets
+- Speed and heading controls for all vessels
+
+
+Detailed UI Implementation
+--------------------------
+
+Radar Display - Coordinate System:
+
+The radar uses a canvas element to draw vessels. World coordinates (in nautical miles) are converted to screen coordinates (in pixels) using these formulas:
+
+  screen_x = canvas_center_x + (world_x - own_x) x zoom + pan_x
+  screen_y = canvas_center_y - (world_y - own_y) x zoom + pan_y
+
+Note: Y is inverted because screen coordinates increase downward, but world coordinates increase upward (north).
+
+
+Zoom Feature:
+
+Zoom controls how many pixels represent one nautical mile. The zoom value ranges from 10 to 200 pixels per nautical mile.
+
+How zoom works:
+- Default zoom = 50 pixels per nautical mile
+- Zoom in: zoom = zoom x 1.2 (increase by 20%)
+- Zoom out: zoom = zoom x 0.8 (decrease by 20%)
+- Mouse wheel also triggers zoom (scroll up = zoom in, scroll down = zoom out)
+
+When zoomed in, vessels appear larger and farther apart. When zoomed out, you can see more area but vessels appear smaller.
+
+
+Pan Feature:
+
+Pan allows moving the view without changing the zoom level. This is useful to look at vessels that are far from own ship.
+
+How pan works:
+- User clicks and drags on the canvas
+- On mouse down: record starting position (dragStartX = mouseX - panX)
+- On mouse move: update pan offset (panX = mouseX - dragStartX)
+- On mouse up: stop dragging
+
+The pan offset is added to all vessel positions when drawing, effectively shifting the entire view.
+
+
+Viewport Reset:
+
+The reset button restores default view:
+  zoom = 50 (default)
+  panX = 0
+  panY = 0
+
+
+Vessel Rendering:
+
+Each vessel is drawn as a triangle pointing in its heading direction:
+
+1. Calculate screen position from world position
+2. Save canvas state
+3. Translate to vessel position
+4. Rotate by heading angle (converted to radians)
+5. Draw triangle shape
+6. Restore canvas state
+
+The triangle is filled with color based on risk level:
+- Own vessel: Blue (#0066cc)
+- Safe target: Green (#28a745)
+- Warning target: Yellow (#e6a000)
+- Danger target: Red (#dc3545)
+
+
+Velocity Vector:
+
+A line is drawn from each vessel showing its direction and speed:
+  vector_length = speed x zoom x 0.1
+  end_x = vessel_x + sin(heading) x vector_length
+  end_y = vessel_y - cos(heading) x vector_length
+
+Faster vessels have longer lines, making it easy to see which ships are moving quickly.
+
+
+Grid and Range Rings:
+
+The grid helps judge distances:
+- Minor grid lines every 1 nautical mile (light gray)
+- Major grid lines every 5 nautical miles (darker gray)
+- Dashed range rings at 1, 2, 5, 10 nm from center
+
+Grid lines are drawn by finding where each grid line intersects the visible canvas area and drawing from edge to edge.
+
+
+Scale Bar:
+
+Shows the current scale based on zoom level:
+  distance_shown = 100 / zoom  (in nautical miles)
+
+This updates automatically when zoom changes.
+
+
+Alert Panel:
+
+Alerts are displayed in the sidebar, sorted by severity:
+1. All alerts are collected from the world snapshot
+2. Sorted so DANGER appears first, then WARNING
+3. Each alert shows: target ID, risk badge, CPA distance, time to CPA
+
+
+Target List Updates:
+
+The target list shows all vessels with their current position, speed, and heading. To prevent input fields from being overwritten while the user is typing:
+- Position display updates on every server message
+- Speed and heading input fields only update when the target list structure changes (add/remove)
+- This allows users to type new values without interruption
+
+
+UI and Backend Interaction Flow
+-------------------------------
+
+Here is how the UI (browser) and backend (Python server) communicate step by step:
+
+
+Initial Connection:
+
+1. User opens the browser and navigates to http://localhost:8080
+2. The server serves the index.html file over HTTP
+3. The JavaScript code in index.html creates a WebSocket connection to ws://localhost:8765
+4. Once connected, the UI sends a step command with dt=0 to get the initial state
+5. Server responds with a snapshot containing own vessel, all targets, and current alerts
+6. UI renders the radar display, target list, and alert panel using this data
+
+
+Simulation Start:
+
+1. User clicks the "Start" button
+2. UI sends {"command": "start"} to server
+3. Server sets simulation state to running
+4. Server responds with current snapshot
+5. UI starts a timer that fires every 100 milliseconds
+6. Every 100ms, UI sends {"command": "step", "dt": 0.0000278} (100ms converted to hours)
+7. Server advances all vessel positions by dt hours
+8. Server calculates new CPA/TCPA for all targets
+9. Server classifies risk levels and generates alerts
+10. Server sends updated snapshot back to UI
+11. UI updates radar display, positions, and alerts
+12. This cycle repeats until user clicks Pause
+
+
+Adding a Target:
+
+1. User fills in the form: ID="T3", X=5, Y=3, Speed=12, Heading=225
+2. User clicks "Add" button
+3. UI validates all fields are filled
+4. UI sends {"command": "add_target", "id": "T3", "x": 5, "y": 3, "speed": 12, "heading": 225}
+5. Server creates a new Vessel object with these parameters
+6. Server adds vessel to the World's target list
+7. Server calculates CPA/TCPA for new target against own vessel
+8. Server sends updated snapshot including new target and its alert status
+9. UI receives snapshot and adds new target to the radar and target list
+
+
+Removing a Target:
+
+1. User clicks the "X" button next to a target
+2. UI reads the target ID from the button's data attribute
+3. UI sends {"command": "remove_target", "id": "T3"}
+4. Server finds and removes the target from World's target list
+5. Server sends updated snapshot without the removed target
+6. UI receives snapshot and removes target from radar and target list
+
+
+Changing Own Vessel Course:
+
+1. User types new heading value (e.g., 45) in the heading input field
+2. User clicks "Set" button
+3. UI sends {"command": "update_own_heading", "heading_deg": 45}
+4. Server updates own vessel's heading to 45 degrees
+5. Server recalculates all CPA/TCPA values (because relative velocities changed)
+6. Server sends updated snapshot with new alerts
+7. UI updates radar to show own vessel pointing in new direction
+8. Risk levels may change based on new course
+
+
+Changing Target Vessel Course:
+
+1. User types new speed and heading values for a target
+2. User clicks "Update" button
+3. UI sends {"command": "update_target_speed", "id": "T1", "speed_knots": 15}
+4. UI sends {"command": "update_target_heading", "id": "T1", "heading_deg": 90}
+5. Server updates the target vessel's speed and heading
+6. Server recalculates CPA/TCPA for this target
+7. Server sends updated snapshot
+8. UI updates target's velocity vector on radar
+9. Alert status may change (e.g., from DANGER to SAFE if target turns away)
+
+
+Zoom and Pan (Local Only):
+
+1. User scrolls mouse wheel or clicks zoom buttons
+2. UI updates zoom level locally (no server communication needed)
+3. UI re-renders the radar with new scale
+4. User drags on canvas
+5. UI updates pan offset locally
+6. UI re-renders the radar with shifted view
+7. All zoom/pan is handled in the browser - server only knows about vessel positions
+
+
+Reset Simulation:
+
+1. User clicks "Reset" button
+2. UI sends {"command": "reset"}
+3. Server recreates the World with initial vessel positions
+4. All targets return to their starting positions
+5. Own vessel returns to origin (0, 0)
+6. Server sends fresh snapshot
+7. UI updates all displays to show reset state
+8. Simulation is paused after reset
+
+
+Step 12: Vessel Course Changes
+
+Added ability to change speed and heading of both own vessel and target vessels through the UI.
+
+
+How the Main Parts Work
+-----------------------
+
+Position Calculation:
+
+When a vessel moves, I use basic trigonometry. Given speed (s) in knots, heading (theta) in degrees, and time (t) in hours:
+
+  Vx = s x sin(theta)      (velocity in x-direction)
+  Vy = s x cos(theta)      (velocity in y-direction)
+
+  X_new = X_old + Vx x t
+  Y_new = Y_old + Vy x t
+
+
+CPA/TCPA Calculation:
+
+I find the relative position (where is target compared to us) and relative velocity (how fast is target moving compared to us).
+
+Step 1 - Calculate relative vectors:
+  Prel = P_target - P_own
+  Vrel = V_target - V_own
+
+Step 2 - Calculate TCPA using dot product:
+  TCPA = -(Prel . Vrel) / |Vrel|^2
+       = -(Prel_x x Vrel_x + Prel_y x Vrel_y) / (Vrel_x^2 + Vrel_y^2)
+
+Step 3 - Calculate CPA (distance at TCPA):
+  CPA = |Prel + Vrel x TCPA|
+      = sqrt[(Prel_x + Vrel_x x TCPA)^2 + (Prel_y + Vrel_y x TCPA)^2]
+
+
+Server Communication:
+
+The browser connects to the server via WebSocket. When user clicks buttons like Start or Add Target, commands are sent to server. Server updates the simulation and sends back the new state.
+
+Example command from browser to server:
+  {"command": "add_target", "id": "T3", "x": 5.0, "y": 3.0, "speed": 12, "heading": 225}
+
+Example response from server to browser:
+  {
+    "own": {"id": "OWN", "position": {"x": 0.0, "y": 0.5}, "speed_knots": 10, "heading_deg": 0},
+    "targets": [
+      {"id": "T1", "position": {"x": 2.0, "y": 7.5}, "speed_knots": 8, "heading_deg": 180,
+       "alert": {"risk": "WARNING", "cpa_nm": 0.8, "tcpa_hours": 0.4, "text": "CPA 0.8 nm in 24 min"}}
+    ],
+    "alerts": [{"target_id": "T1", "risk": "WARNING", "cpa_nm": 0.8, "tcpa_hours": 0.4}]
+  }
+
+
+Unit Testing Approach
+---------------------
+
+I followed a test-driven approach where I wrote tests alongside the code. Here is how I organized the tests:
+
+
+Test Files Structure:
+
+Each source file has corresponding test files. For example:
+- test_motion.py and test_motion_velocity.py - Tests for velocity calculations
+- test_cpa_distance.py and test_tcpa.py - Tests for collision calculations
+- test_risk.py - Tests for risk classification
+- test_alert_sorting.py and test_alert_text.py - Tests for alerts
+- test_vessel.py and test_vessel_step.py - Tests for vessel movement
+- test_world.py, test_world_snapshot.py, test_world_targets.py - Tests for world management
+- test_simulation.py and test_simulation_speed.py - Tests for simulation control
+- test_alerting.py and test_alerts.py - Integration tests for alerting system
+- test_ui_regression.py - Tests for UI command handling
+
+
+What I Test:
+
+- Basic calculations give correct results
+- Edge cases like zero speed or parallel courses
+- Risk levels are assigned correctly based on thresholds
+- Alerts are sorted in correct order
+- Adding and removing targets works properly
+- Simulation start/pause/step work correctly
+
+
+Edge Cases Handled:
+
+- Zero relative velocity (ships moving same direction at same speed) - returns infinite TCPA
+- Negative TCPA (ships already passed closest point) - no danger alert
+- Ships on parallel courses that never meet - large CPA, safe
+- Head-on collision course - CPA near zero, high danger
+- Stationary vessel - still calculates valid CPA based on own vessel movement
+- Very high speeds - formulas still work correctly
+
+
+Running Tests:
+
+All tests can be run with a simple command:
+  python -m unittest discover -s tests -v
+
+Currently there are 124 tests that all pass. This gives confidence that the core logic is working correctly.
+
+
+Example Test Pattern:
+
+  def test_cpa_head_on_collision(self):
+      # Two ships heading directly at each other
+      own = Vessel("OWN", Position(0, 0), 10, 0)    # Going north
+      target = Vessel("T1", Position(0, 5), 10, 180)  # Going south
+      
+      tcpa = compute_tcpa(own, target)
+      cpa = compute_cpa(own, target, tcpa)
+      
+      # They should meet in the middle, CPA should be 0
+      self.assertAlmostEqual(cpa, 0, places=1)
+
+
+Minimal Dependencies
+--------------------
+
+This project uses very few external dependencies to keep it simple:
+
+requirements.txt contains only:
+  websockets>=16.0
+
+Why so minimal:
+- Python standard library provides everything else we need (math, json, asyncio)
+- No numpy or scipy needed - basic math is sufficient for our calculations
+- No web framework needed - WebSocket library handles communication
+- No build tools for frontend - plain HTML/CSS/JavaScript works fine
+
+This makes the project very easy to set up. Just run:
+  pip install websockets
+
+And you're ready to go.
+
+
+================================================================================
+Summary
+================================================================================
+
+I built a vessel tracking and collision warning system by breaking the problem into small pieces and solving them one at a time. Each piece has its own tests to make sure it works correctly. The system uses minimal dependencies which makes it easy to install and run. The user interface shows vessels on a radar display and warns when ships are getting too close to each other.
+
+Key Achievements:
+- Real-time collision risk assessment using CPA/TCPA calculations
+- 124 unit tests covering all core functionality
+- Only 1 external dependency (websockets)
+- Interactive UI with radar display, zoom/pan, and vessel controls
+- Support for multiple simultaneous target vessels
+- Ability to modify vessel courses during simulation
+
+How to Run:
+1. Install dependency: pip install websockets
+2. Start server: python src/server.py
+3. Open browser: http://localhost:8080
+4. Click Start to begin simulation
+
+Possible Future Improvements:
+- Add vessel track history display
+- Support for waypoints and route planning
+- Save/load simulation scenarios
+- Multiple own vessel support
+- Configurable risk thresholds
