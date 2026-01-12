@@ -53,3 +53,19 @@ class Vessel:
         self.heading_deg = new_heading_deg % 360.0
 
 
+
+        #To change the speed of the vessel
+    def change_speed(self, new_speed_knots: float) -> None:
+        """
+        Change vessel speed.
+
+        Args:
+            new_speed_knots: New speed in knots (must be >= 0)
+        """
+        if new_speed_knots < 0:
+            raise ValueError("Speed must be non-negative")
+
+        self.speed_knots = new_speed_knots
+        
+
+
