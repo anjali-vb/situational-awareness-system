@@ -30,6 +30,7 @@ own = Vessel(
 targets = [
     Vessel("T1", Position(2.0, 8.0), 8.0, 180.0),
     Vessel("T2", Position(-5.0, 5.0), 12.0, 90.0),
+    Vessel("DANGER1", Position(0.5, 3.0), 15.0, 190.0),  # Approaching head-on, CPA < 0.5nm
 ]
 
 world = World(own, targets)
@@ -39,6 +40,7 @@ simulation = Simulation(world)
 # WebSocket handler
 # -------------------------
 async def handler(websocket):
+    global world, simulation  # Declare at top for reset command
     logger.info("New WebSocket connection established")
     try:
         async for message in websocket:
@@ -61,6 +63,23 @@ async def handler(websocket):
 
             elif cmd == "speed":
                 simulation.set_speed(data["value"])
+
+            elif cmd == "reset":
+                # Reset to initial state
+                own = Vessel(
+                    vessel_id="OWN",
+                    position=Position(0.0, 0.0),
+                    speed_knots=10.0,
+                    heading_deg=0.0,
+                )
+                targets = [
+                    Vessel("T1", Position(2.0, 8.0), 8.0, 180.0),
+                    Vessel("T2", Position(-5.0, 5.0), 12.0, 90.0),
+                    Vessel("DANGER1", Position(0.5, 3.0), 15.0, 190.0),
+                ]
+                world = World(own, targets)
+                simulation = Simulation(world)
+                logger.info("Simulation reset to initial state")
 
             # -------------------------
             # Target management

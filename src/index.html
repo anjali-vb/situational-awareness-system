@@ -58,10 +58,20 @@
 
         /* ----- INFO BOX ----- */
         .info-box { background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 20px; }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.9em; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.9em; }
         .info-row:last-child { margin-bottom: 0; }
         .label { color: #666; }
         .value { font-family: monospace; color: #333; }
+        .editable-value { display: flex; align-items: center; gap: 5px; }
+        .editable-value input { 
+            width: 60px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; 
+            font-family: monospace; font-size: 0.9em; text-align: right;
+        }
+        .editable-value button { 
+            padding: 4px 8px; font-size: 0.75em; border: none; background: #0066cc; 
+            color: white; border-radius: 3px; cursor: pointer;
+        }
+        .editable-value button:hover { background: #0055aa; }
 
         /* ----- ALERTS ----- */
         .alert-list { max-height: 200px; overflow-y: auto; margin-bottom: 20px; }
@@ -80,11 +90,23 @@
         /* ----- TARGETS ----- */
         .target-list { margin-bottom: 20px; }
         .target {
-            display: flex; justify-content: space-between; align-items: center;
             padding: 8px 10px; background: #f8f9fa; border-radius: 4px;
             margin-bottom: 6px; font-size: 0.9em;
         }
+        .target-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .target-id { font-weight: 600; color: #0066cc; }
+        .target-info { color: #666; font-size: 0.85em; margin-bottom: 6px; }
+        .target-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .target-controls input { 
+            width: 50px; padding: 3px 5px; border: 1px solid #ddd; border-radius: 3px; 
+            font-size: 0.8em; text-align: right;
+        }
+        .target-controls label { font-size: 0.75em; color: #888; }
+        .target-controls button { 
+            padding: 3px 8px; font-size: 0.75em; border: none; border-radius: 3px; cursor: pointer;
+        }
+        .target-controls .btn-update { background: #28a745; color: white; }
+        .target-controls .btn-update:hover { background: #218838; }
 
         /* ----- LEGEND ----- */
         .legend { display: flex; flex-wrap: wrap; gap: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; }
@@ -107,7 +129,6 @@
         }
         .zoom-controls button:hover { background: #f0f0f0; }
         .zoom-level { text-align: center; font-size: 0.8em; color: #666; }
-        .compass { position: absolute; top: 20px; right: 20px; width: 60px; height: 60px; }
         .scale-bar {
             position: absolute; bottom: 20px; right: 20px; background: white;
             padding: 8px 12px; border-radius: 6px; font-size: 0.85em;
@@ -178,11 +199,19 @@
                 </div>
                 <div class="info-row">
                     <span class="label">Speed:</span>
-                    <span class="value" id="ownSpeed">0.0 kn</span>
+                    <div class="editable-value">
+                        <input type="number" id="ownSpeedInput" value="10" min="0" max="50" step="0.5">
+                        <span>kn</span>
+                        <button id="btnUpdateOwnSpeed">Set</button>
+                    </div>
                 </div>
                 <div class="info-row">
                     <span class="label">Heading:</span>
-                    <span class="value" id="ownHeading">0.0°</span>
+                    <div class="editable-value">
+                        <input type="number" id="ownHeadingInput" value="0" min="0" max="359" step="1">
+                        <span>°</span>
+                        <button id="btnUpdateOwnHeading">Set</button>
+                    </div>
                 </div>
             </div>
 
@@ -215,13 +244,6 @@
                     <button id="zoomOut" title="Zoom Out">−</button>
                     <button id="resetView" title="Reset View" style="font-size: 1em;">⟲</button>
                 </div>
-                <svg class="compass" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="#ddd" stroke-width="2"/>
-                    <text x="50" y="18" text-anchor="middle" fill="#0066cc" font-size="14" font-weight="bold">N</text>
-                    <text x="88" y="54" text-anchor="middle" fill="#999" font-size="11">E</text>
-                    <text x="50" y="92" text-anchor="middle" fill="#999" font-size="11">S</text>
-                    <text x="12" y="54" text-anchor="middle" fill="#999" font-size="11">W</text>
-                </svg>
                 <div class="scale-bar"><span id="scaleValue">1 nm</span></div>
             </div>
 
@@ -393,6 +415,8 @@
             this.isRunning = false;
             this.updateButtons();
             this.stopTimer();
+            // Signal to resync own vessel inputs on next update
+            if (window.app) window.app._initialSyncDone = false;
         }
 
         step() {
@@ -431,8 +455,64 @@
 
 
     // ============================================
+    // OWN VESSEL CONTROLLER CLASS
+    // Handles own vessel speed and heading changes
+    // ============================================
+    class OwnVesselController {
+        constructor(connection) {
+            this.connection = connection;
+
+            // DOM elements
+            this.speedInput = document.getElementById('ownSpeedInput');
+            this.headingInput = document.getElementById('ownHeadingInput');
+            this.btnUpdateSpeed = document.getElementById('btnUpdateOwnSpeed');
+            this.btnUpdateHeading = document.getElementById('btnUpdateOwnHeading');
+
+            this.bindEvents();
+        }
+
+        bindEvents() {
+            this.btnUpdateSpeed.addEventListener('click', () => this.updateSpeed());
+            this.btnUpdateHeading.addEventListener('click', () => this.updateHeading());
+
+            // Enter key triggers update
+            this.speedInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.updateSpeed();
+            });
+            this.headingInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.updateHeading();
+            });
+        }
+
+        updateSpeed() {
+            const speed = parseFloat(this.speedInput.value);
+            if (!isNaN(speed) && speed >= 0) {
+                this.connection.send({ command: 'update_own_speed', speed_knots: speed });
+            }
+        }
+
+        updateHeading() {
+            let heading = parseFloat(this.headingInput.value);
+            if (!isNaN(heading)) {
+                // Normalize heading to 0-359
+                heading = ((heading % 360) + 360) % 360;
+                this.headingInput.value = heading;
+                this.connection.send({ command: 'update_own_heading', heading_deg: heading });
+            }
+        }
+
+        // Update input fields when server data arrives
+        syncFromServer(own) {
+            if (!own) return;
+            this.speedInput.value = own.speed_knots.toFixed(1);
+            this.headingInput.value = own.heading_deg.toFixed(0);
+        }
+    }
+
+
+    // ============================================
     // TARGET MANAGER CLASS
-    // Handles adding and removing targets
+    // Handles adding, removing, and updating targets
     // ============================================
     class TargetManager {
         constructor(connection) {
@@ -495,14 +575,66 @@
         }
 
         // ----------------------------------------
-        // Event delegation for remove buttons
+        // Update target speed
+        // ----------------------------------------
+        updateSpeed(targetId, speed) {
+            if (!isNaN(speed) && speed >= 0) {
+                this.connection.send({ 
+                    command: 'update_target_speed', 
+                    id: targetId, 
+                    speed_knots: speed 
+                });
+            }
+        }
+
+        // ----------------------------------------
+        // Update target heading
+        // ----------------------------------------
+        updateHeading(targetId, heading) {
+            if (!isNaN(heading)) {
+                // Normalize heading to 0-359
+                heading = ((heading % 360) + 360) % 360;
+                this.connection.send({ 
+                    command: 'update_target_heading', 
+                    id: targetId, 
+                    heading_deg: heading 
+                });
+            }
+        }
+
+        // ----------------------------------------
+        // Event delegation for target buttons
         // Called once to handle all dynamically created buttons
         // ----------------------------------------
         setupEventListeners() {
             document.addEventListener('click', (e) => {
+                // Remove target button
                 if (e.target.matches('.remove-target-btn')) {
                     const targetId = e.target.dataset.targetId;
                     this.remove(targetId);
+                }
+                
+                // Update target button
+                if (e.target.matches('.update-target-btn')) {
+                    const targetId = e.target.dataset.targetId;
+                    const row = e.target.closest('.target');
+                    const speedInput = row.querySelector('.target-speed-input');
+                    const headingInput = row.querySelector('.target-heading-input');
+                    
+                    const speed = parseFloat(speedInput.value);
+                    const heading = parseFloat(headingInput.value);
+                    
+                    this.updateSpeed(targetId, speed);
+                    this.updateHeading(targetId, heading);
+                }
+            });
+
+            // Enter key in target inputs triggers update
+            document.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && (e.target.matches('.target-speed-input') || e.target.matches('.target-heading-input'))) {
+                    const row = e.target.closest('.target');
+                    const updateBtn = row.querySelector('.update-target-btn');
+                    if (updateBtn) updateBtn.click();
                 }
             });
         }
@@ -788,8 +920,6 @@
     class UIUpdater {
         constructor() {
             this.ownPosition = document.getElementById('ownPosition');
-            this.ownSpeed = document.getElementById('ownSpeed');
-            this.ownHeading = document.getElementById('ownHeading');
             this.alertList = document.getElementById('alertList');
             this.targetList = document.getElementById('targetList');
         }
@@ -803,8 +933,6 @@
         updateOwnVessel(own) {
             if (!own) return;
             this.ownPosition.textContent = `(${own.position.x.toFixed(2)}, ${own.position.y.toFixed(2)}) nm`;
-            this.ownSpeed.textContent = `${own.speed_knots.toFixed(1)} kn`;
-            this.ownHeading.textContent = `${own.heading_deg.toFixed(1)}°`;
         }
 
         updateAlerts(alerts) {
@@ -841,20 +969,53 @@
                 return;
             }
 
-            this.targetList.innerHTML = targets.map(t => `
-                <div class="target">
-                    <div>
+            // Check if we need to rebuild (different target count or IDs)
+            const existingIds = Array.from(this.targetList.querySelectorAll('.target'))
+                .map(el => el.dataset.targetId);
+            const newIds = targets.map(t => t.id);
+            const needsRebuild = existingIds.length !== newIds.length || 
+                !existingIds.every((id, i) => id === newIds[i]);
+
+            if (needsRebuild) {
+                // Full rebuild needed - render with current values
+                this.targetList.innerHTML = targets.map(t => this._renderTargetHtml(t)).join('');
+            } else {
+                // Update only position (not speed/heading inputs) - keep user values intact
+                targets.forEach(t => {
+                    const row = this.targetList.querySelector(`.target[data-target-id="${t.id}"]`);
+                    if (!row) return;
+
+                    // Always update position display
+                    const infoEl = row.querySelector('.target-info');
+                    if (infoEl) {
+                        infoEl.textContent = `Position: (${t.position.x.toFixed(2)}, ${t.position.y.toFixed(2)}) nm`;
+                    }
+                    // Speed and heading inputs are NOT updated - user controls them
+                });
+            }
+        }
+
+        _renderTargetHtml(t) {
+            return `
+                <div class="target" data-target-id="${t.id}">
+                    <div class="target-header">
                         <span class="target-id">${t.id}</span>
-                        <span style="color: #666; margin-left: 10px;">
-                            (${t.position.x.toFixed(2)}, ${t.position.y.toFixed(2)}) nm
-                        </span>
-                        <span style="color: #888; margin-left: 8px; font-size: 0.85em;">
-                            ${t.speed_knots.toFixed(1)} kn @ ${t.heading_deg.toFixed(0)}°
-                        </span>
+                        <button class="btn btn-danger btn-small remove-target-btn" data-target-id="${t.id}">✕</button>
                     </div>
-                    <button class="btn btn-danger btn-small remove-target-btn" data-target-id="${t.id}">✕</button>
+                    <div class="target-info">
+                        Position: (${t.position.x.toFixed(2)}, ${t.position.y.toFixed(2)}) nm
+                    </div>
+                    <div class="target-controls">
+                        <label>Speed:</label>
+                        <input type="number" class="target-speed-input" value="${t.speed_knots.toFixed(1)}" min="0" max="50" step="0.5">
+                        <span>kn</span>
+                        <label>Hdg:</label>
+                        <input type="number" class="target-heading-input" value="${t.heading_deg.toFixed(0)}" min="0" max="359" step="1">
+                        <span>°</span>
+                        <button class="btn-update update-target-btn" data-target-id="${t.id}">Update</button>
+                    </div>
                 </div>
-            `).join('');
+            `;
         }
     }
 
@@ -871,6 +1032,7 @@
             this.connection = new Connection(CONFIG.serverUrl, (data) => this.onServerUpdate(data));
             this.simulation = new Simulation(this.connection);
             this.targetManager = new TargetManager(this.connection);
+            this.ownVesselController = new OwnVesselController(this.connection);
             
             const canvas = document.getElementById('radarCanvas');
             this.viewport = new Viewport(canvas, () => this.render());
@@ -885,6 +1047,11 @@
         onServerUpdate(data) {
             this.world = data;
             this.ui.update(this.world);
+            // Don't overwrite user input - only sync on initial load
+            if (!this._initialSyncDone && data.own) {
+                this.ownVesselController.syncFromServer(data.own);
+                this._initialSyncDone = true;
+            }
             this.render();
         }
 
