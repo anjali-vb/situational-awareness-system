@@ -13,10 +13,9 @@ from position import Position
 # -------------------------
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
-
 
 # -------------------------
 # Initial simulation setup
@@ -36,7 +35,6 @@ targets = [
 world = World(own, targets)
 simulation = Simulation(world)
 
-
 # -------------------------
 # WebSocket handler
 # -------------------------
@@ -48,29 +46,28 @@ async def handler(websocket):
             cmd = data.get("command")
             logger.info(f"Received command: {cmd}")
 
+            # -------------------------
+            # Simulation control
+            # -------------------------
             if cmd == "start":
-                logger.info("Starting simulation")
                 simulation.start()
 
             elif cmd == "pause":
-                logger.info("Pausing simulation")
                 simulation.pause()
 
             elif cmd == "step":
                 dt = data.get("dt", 0.1)
-                logger.info(f"Stepping simulation with dt={dt}")
                 simulation.step(dt)
 
             elif cmd == "speed":
-                speed = data["value"]
-                logger.info(f"Setting simulation speed to {speed}")
-                simulation.set_speed(speed)
+                simulation.set_speed(data["value"])
 
+            # -------------------------
+            # Target management
+            # -------------------------
             elif cmd == "add_target":
-                target_id = data["id"]
-                logger.info(f"Adding target vessel: {target_id} at ({data['x']}, {data['y']}) with speed {data['speed']} knots")
                 t = Vessel(
-                    vessel_id=target_id,
+                    vessel_id=data["id"],
                     position=Position(data["x"], data["y"]),
                     speed_knots=data["speed"],
                     heading_deg=data["heading"],
@@ -78,22 +75,54 @@ async def handler(websocket):
                 world.add_target(t)
 
             elif cmd == "remove_target":
-                target_id = data["id"]
-                logger.info(f"Removing target vessel: {target_id}")
-                world.remove_target(target_id)
+                world.remove_target(data["id"])
+
+            # -------------------------
+            # Own vessel course control (NEW)
+            # -------------------------
+            elif cmd == "update_own_heading":
+                heading = data["heading_deg"]
+                logger.info(f"Updating own vessel heading to {heading}")
+                world.update_own_heading(heading)
+
+            elif cmd == "update_own_speed":
+                speed = data["speed_knots"]
+                logger.info(f"Updating own vessel speed to {speed}")
+                world.update_own_speed(speed)
+
+            # -------------------------
+            # Target vessel course control (NEW)
+            # -------------------------
+            elif cmd == "update_target_heading":
+                vessel_id = data["id"]
+                heading = data["heading_deg"]
+                updated = world.update_target_heading(vessel_id, heading)
+                logger.info(
+                    f"Updated heading for {updated} target(s) with id={vessel_id}"
+                )
+
+            elif cmd == "update_target_speed":
+                vessel_id = data["id"]
+                speed = data["speed_knots"]
+                updated = world.update_target_speed(vessel_id, speed)
+                logger.info(
+                    f"Updated speed for {updated} target(s) with id={vessel_id}"
+                )
 
             else:
                 logger.warning(f"Unknown command received: {cmd}")
 
-            # Always respond with fresh snapshot
+            # -------------------------
+            # Always send snapshot
+            # -------------------------
             snapshot = world.snapshot()
-            logger.debug("Sending world snapshot to client")
             await websocket.send(json.dumps(snapshot))
+
     except websockets.exceptions.ConnectionClosed:
         logger.info("WebSocket connection closed")
-    except Exception as e:
-        logger.error(f"Error in WebSocket handler: {e}", exc_info=True)
 
+    except Exception as e:
+        logger.error("Error in WebSocket handler", exc_info=True)
 
 # -------------------------
 # Server loop
@@ -101,7 +130,7 @@ async def handler(websocket):
 async def main():
     logger.info("Starting WebSocket server on ws://localhost:8765")
     async with websockets.serve(handler, "localhost", 8765):
-        logger.info("WebSocket server is running and ready for connections")
+        logger.info("WebSocket server is running")
         await asyncio.Future()  # run forever
 
 
