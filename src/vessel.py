@@ -2,7 +2,7 @@ import math
 from dataclasses import dataclass
 from position import Position
 
-#Reduces boilerplate code (no need to manually write __init__)
+
 @dataclass
 class Vessel:
     """
@@ -41,3 +41,15 @@ class Vessel:
             x=self.position.x + vx * dt_hours,
             y=self.position.y + vy * dt_hours
         )
+        
+        #To change thde direction of the vessel
+    def change_heading(self, new_heading_deg: float) -> None:
+        """
+        Change vessel heading.
+
+        Args:
+            new_heading_deg: New heading in degrees (will be normalized)
+        """
+        self.heading_deg = new_heading_deg % 360.0
+
+
