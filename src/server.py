@@ -144,12 +144,14 @@ async def handler(websocket):
         logger.error("Error in WebSocket handler", exc_info=True)
 
 # -------------------------
+# -------------------------
 # Server loop
 # -------------------------
 async def main():
     logger.info("Starting WebSocket server on ws://localhost:8765")
     async with websockets.serve(handler, "localhost", 8765):
         logger.info("WebSocket server is running")
+        logger.info("Open the index.html file directly in your browser to connect")
         await asyncio.Future()  # run forever
 
 
