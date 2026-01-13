@@ -8,18 +8,18 @@ from simulation import Simulation
 from vessel import Vessel
 from position import Position
 
-# -------------------------
+
 # Logging setup
-# -------------------------
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
-# -------------------------
+
 # Initial simulation setup
-# -------------------------
+
 own = Vessel(
     vessel_id="OWN",
     position=Position(0.0, 0.0),
@@ -36,9 +36,9 @@ targets = [
 world = World(own, targets)
 simulation = Simulation(world)
 
-# -------------------------
+
 # WebSocket handler
-# -------------------------
+
 async def handler(websocket):
     global world, simulation  # Declare at top for reset command
     logger.info("New WebSocket connection established")
@@ -48,9 +48,9 @@ async def handler(websocket):
             cmd = data.get("command")
             logger.info(f"Received command: {cmd}")
 
-            # -------------------------
+            
             # Simulation control
-            # -------------------------
+            
             if cmd == "start":
                 simulation.start()
 
@@ -81,9 +81,9 @@ async def handler(websocket):
                 simulation = Simulation(world)
                 logger.info("Simulation reset to initial state")
 
-            # -------------------------
+            
             # Target management
-            # -------------------------
+           
             elif cmd == "add_target":
                 t = Vessel(
                     vessel_id=data["id"],
@@ -96,9 +96,9 @@ async def handler(websocket):
             elif cmd == "remove_target":
                 world.remove_target(data["id"])
 
-            # -------------------------
-            # Own vessel course control (NEW)
-            # -------------------------
+            
+            # Own vessel course control 
+            
             elif cmd == "update_own_heading":
                 heading = data["heading_deg"]
                 logger.info(f"Updating own vessel heading to {heading}")
@@ -109,9 +109,9 @@ async def handler(websocket):
                 logger.info(f"Updating own vessel speed to {speed}")
                 world.update_own_speed(speed)
 
-            # -------------------------
-            # Target vessel course control (NEW)
-            # -------------------------
+            
+            # Target vessel course control 
+            
             elif cmd == "update_target_heading":
                 vessel_id = data["id"]
                 heading = data["heading_deg"]
@@ -131,9 +131,9 @@ async def handler(websocket):
             else:
                 logger.warning(f"Unknown command received: {cmd}")
 
-            # -------------------------
+            
             # Always send snapshot
-            # -------------------------
+            
             snapshot = world.snapshot()
             await websocket.send(json.dumps(snapshot))
 
@@ -143,10 +143,10 @@ async def handler(websocket):
     except Exception as e:
         logger.error("Error in WebSocket handler", exc_info=True)
 
-# -------------------------
-# -------------------------
+
+
 # Server loop
-# -------------------------
+
 async def main():
     logger.info("Starting WebSocket server on ws://localhost:8765")
     async with websockets.serve(handler, "localhost", 8765):

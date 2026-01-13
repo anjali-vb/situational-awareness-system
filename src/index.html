@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Situational Awareness System</title>
-    
-    <!-- ========================================
-         CSS STYLES
-    ======================================== -->
+
+    <!--------css styles-->
     <style>
         /* ----- RESET & BASE ----- */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #f5f5f5;
@@ -29,16 +33,37 @@
             align-items: center;
             border-bottom: 1px solid #ddd;
         }
-        header h1 { font-size: 1.2em; font-weight: 500; }
-        .status { display: flex; align-items: center; gap: 8px; font-size: 0.9em; }
+
+        header h1 {
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
         .status-dot {
-            width: 10px; height: 10px; border-radius: 50%;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
             background: #dc3545;
         }
-        .status-dot.connected { background: #28a745; }
+
+        .status-dot.connected {
+            background: #28a745;
+        }
 
         /* ----- LAYOUT ----- */
-        .main { display: flex; flex: 1; overflow: hidden; }
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
         .sidebar {
             width: 280px;
             background: white;
@@ -46,6 +71,7 @@
             overflow-y: auto;
             padding: 15px;
         }
+
         .sidebar h2 {
             font-size: 0.85em;
             color: #666;
@@ -54,125 +80,455 @@
             padding-bottom: 5px;
             border-bottom: 1px solid #eee;
         }
-        .center { flex: 1; display: flex; flex-direction: column; background: #f5f5f5; }
+
+        .center {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f5f5f5;
+        }
 
         /* ----- INFO BOX ----- */
-        .info-box { background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 20px; }
-        .info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.9em; }
-        .info-row:last-child { margin-bottom: 0; }
-        .label { color: #666; }
-        .value { font-family: monospace; color: #333; }
-        .editable-value { display: flex; align-items: center; gap: 5px; }
-        .editable-value input { 
-            width: 60px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; 
-            font-family: monospace; font-size: 0.9em; text-align: right;
+        .info-box {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
         }
-        .editable-value button { 
-            padding: 4px 8px; font-size: 0.75em; border: none; background: #0066cc; 
-            color: white; border-radius: 3px; cursor: pointer;
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 0.9em;
         }
-        .editable-value button:hover { background: #0055aa; }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .label {
+            color: #666;
+        }
+
+        .value {
+            font-family: monospace;
+            color: #333;
+        }
+
+        .editable-value {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .editable-value input {
+            width: 60px;
+            padding: 4px 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            text-align: right;
+        }
+
+        .editable-value button {
+            padding: 4px 8px;
+            font-size: 0.75em;
+            border: none;
+            background: #0066cc;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .editable-value button:hover {
+            background: #0055aa;
+        }
 
         /* ----- ALERTS ----- */
-        .alert-list { max-height: 200px; overflow-y: auto; margin-bottom: 20px; }
-        .alert { padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid; }
-        .alert.danger { background: #fff5f5; border-color: #dc3545; }
-        .alert.warning { background: #fffbf0; border-color: #ffc107; }
-        .alert.safe { background: #f5fff7; border-color: #28a745; }
-        .alert-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .alert-target { font-weight: 600; }
-        .alert-badge { font-size: 0.75em; padding: 2px 8px; border-radius: 3px; color: white; }
-        .alert-badge.danger { background: #dc3545; }
-        .alert-badge.warning { background: #ffc107; color: #333; }
-        .alert-badge.safe { background: #28a745; }
-        .alert-details { font-size: 0.85em; color: #666; }
+        .alert-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 4px solid;
+        }
+
+        .alert.danger {
+            background: #fff5f5;
+            border-color: #dc3545;
+        }
+
+        .alert.warning {
+            background: #fffbf0;
+            border-color: #ffc107;
+        }
+
+        .alert.safe {
+            background: #f5fff7;
+            border-color: #28a745;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .alert-target {
+            font-weight: 600;
+        }
+
+        .alert-badge {
+            font-size: 0.75em;
+            padding: 2px 8px;
+            border-radius: 3px;
+            color: white;
+        }
+
+        .alert-badge.danger {
+            background: #dc3545;
+        }
+
+        .alert-badge.warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .alert-badge.safe {
+            background: #28a745;
+        }
+
+        .alert-details {
+            font-size: 0.85em;
+            color: #666;
+        }
 
         /* ----- TARGETS ----- */
-        .target-list { margin-bottom: 20px; }
+        .target-list {
+            margin-bottom: 20px;
+        }
+
         .target {
-            padding: 8px 10px; background: #f8f9fa; border-radius: 4px;
-            margin-bottom: 6px; font-size: 0.9em;
+            padding: 8px 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            font-size: 0.9em;
         }
-        .target-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .target-id { font-weight: 600; color: #0066cc; }
-        .target-info { color: #666; font-size: 0.85em; margin-bottom: 6px; }
-        .target-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .target-controls input { 
-            width: 50px; padding: 3px 5px; border: 1px solid #ddd; border-radius: 3px; 
-            font-size: 0.8em; text-align: right;
+
+        .target-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
         }
-        .target-controls label { font-size: 0.75em; color: #888; }
-        .target-controls button { 
-            padding: 3px 8px; font-size: 0.75em; border: none; border-radius: 3px; cursor: pointer;
+
+        .target-id {
+            font-weight: 600;
+            color: #0066cc;
         }
-        .target-controls .btn-update { background: #28a745; color: white; }
-        .target-controls .btn-update:hover { background: #218838; }
+
+        .target-info {
+            color: #666;
+            font-size: 0.85em;
+            margin-bottom: 6px;
+        }
+
+        .target-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .target-controls input {
+            width: 50px;
+            padding: 3px 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 0.8em;
+            text-align: right;
+        }
+
+        .target-controls label {
+            font-size: 0.75em;
+            color: #888;
+        }
+
+        .target-controls button {
+            padding: 3px 8px;
+            font-size: 0.75em;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .target-controls .btn-update {
+            background: #28a745;
+            color: white;
+        }
+
+        .target-controls .btn-update:hover {
+            background: #218838;
+        }
 
         /* ----- LEGEND ----- */
-        .legend { display: flex; flex-wrap: wrap; gap: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; }
-        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.85em; }
-        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .legend-dot.own { background: #0066cc; }
-        .legend-dot.safe { background: #28a745; }
-        .legend-dot.warning { background: #ffc107; }
-        .legend-dot.danger { background: #dc3545; }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85em;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.own {
+            background: #0066cc;
+        }
+
+        .legend-dot.safe {
+            background: #28a745;
+        }
+
+        .legend-dot.warning {
+            background: #ffc107;
+        }
+
+        .legend-dot.danger {
+            background: #dc3545;
+        }
 
         /* ----- RADAR ----- */
-        .radar { flex: 1; position: relative; min-height: 400px; }
-        #radarCanvas { position: absolute; top: 0; left: 0; cursor: grab; }
-        #radarCanvas:active { cursor: grabbing; }
-        .zoom-controls { position: absolute; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 5px; }
-        .zoom-controls button {
-            width: 36px; height: 36px; border: none; background: white;
-            border-radius: 6px; font-size: 1.3em; cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .radar {
+            flex: 1;
+            position: relative;
+            min-height: 400px;
         }
-        .zoom-controls button:hover { background: #f0f0f0; }
-        .zoom-level { text-align: center; font-size: 0.8em; color: #666; }
+
+        #radarCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: grab;
+        }
+
+        #radarCanvas:active {
+            cursor: grabbing;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .zoom-controls button {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: white;
+            border-radius: 6px;
+            font-size: 1.3em;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .zoom-controls button:hover {
+            background: #f0f0f0;
+        }
+
+        .zoom-level {
+            text-align: center;
+            font-size: 0.8em;
+            color: #666;
+        }
+
         .scale-bar {
-            position: absolute; bottom: 20px; right: 20px; background: white;
-            padding: 8px 12px; border-radius: 6px; font-size: 0.85em;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         /* ----- CONTROLS ----- */
         .controls {
-            background: white; padding: 12px 20px; display: flex;
-            align-items: center; gap: 20px; flex-wrap: wrap; border-top: 1px solid #ddd;
+            background: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            border-top: 1px solid #ddd;
         }
-        .controls h3 { font-size: 0.8em; color: #666; text-transform: uppercase; }
-        .btn-group { display: flex; gap: 8px; }
+
+        .controls h3 {
+            font-size: 0.8em;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
         .btn {
-            padding: 8px 14px; border: 1px solid #ddd; border-radius: 6px;
-            background: white; cursor: pointer; font-size: 0.9em; transition: background 0.2s;
+            padding: 8px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s;
         }
-        .btn:hover { background: #f0f0f0; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-primary { background: #0066cc; border-color: #0066cc; color: white; }
-        .btn-primary:hover { background: #0055aa; }
-        .btn-danger { background: #dc3545; border-color: #dc3545; color: white; }
-        .btn-danger:hover { background: #c82333; }
-        .btn-small { padding: 5px 10px; font-size: 0.8em; }
-        .speed-control { display: flex; align-items: center; gap: 10px; }
-        .speed-control input[type="range"] { width: 100px; }
-        .step-control { display: flex; align-items: center; gap: 8px; }
-        .step-input { width: 60px; padding: 6px; border: 1px solid #ddd; border-radius: 4px; text-align: center; }
-        .add-target { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-        .add-target input { width: 55px; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85em; }
-        .add-target input[type="text"] { width: 50px; }
-        .separator { width: 1px; height: 30px; background: #ddd; }
+
+        .btn:hover {
+            background: #f0f0f0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #0066cc;
+            border-color: #0066cc;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0055aa;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8em;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .speed-control input[type="range"] {
+            width: 100px;
+        }
+
+        .step-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-input {
+            width: 60px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .add-target {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .add-target input {
+            width: 55px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .add-target input[type="text"] {
+            width: 50px;
+        }
+
+        .separator {
+            width: 1px;
+            height: 30px;
+            background: #ddd;
+        }
 
         /* ----- SCROLLBAR ----- */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f5f5f5; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
 
         /* ----- RESPONSIVE ----- */
         @media (max-width: 900px) {
-            .main { flex-direction: column; }
-            .sidebar { width: 100%; max-height: 250px; border-right: none; border-bottom: 1px solid #ddd; }
-            .controls { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .add-target { margin-left: 0; }
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 250px;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .add-target {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
@@ -282,676 +638,676 @@
          JAVASCRIPT - Object-Oriented Design
     ======================================== -->
     <script>
-    // ============================================
-    // CONFIGURATION
-    // ============================================
-    const CONFIG = {
-        serverUrl: 'ws://localhost:8765',
-        updateInterval: 100,
-        defaultZoom: 50,
-        minZoom: 10,
-        maxZoom: 200
-    };
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const CONFIG = {
+            serverUrl: 'ws://localhost:8765',
+            updateInterval: 100,
+            defaultZoom: 50,
+            minZoom: 10,
+            maxZoom: 200
+        };
 
-    const COLORS = {
-        own: '#0066cc',
-        safe: '#28a745',
-        warning: '#e6a000',
-        danger: '#dc3545',
-        grid: '#d0d0d0',
-        gridMajor: '#b0b0b0',
-        background: '#f5f5f5',
-        text: '#666666'
-    };
+        const COLORS = {
+            own: '#0066cc',
+            safe: '#28a745',
+            warning: '#e6a000',
+            danger: '#dc3545',
+            grid: '#d0d0d0',
+            gridMajor: '#b0b0b0',
+            background: '#f5f5f5',
+            text: '#666666'
+        };
 
 
-    // ============================================
-    // CONNECTION CLASS
-    // Manages WebSocket connection to server
-    // ============================================
-    class Connection {
-        constructor(url, onMessage) {
-            this.url = url;
-            this.onMessage = onMessage;
-            this.socket = null;
-            this.isConnected = false;
-            
-            // DOM elements for status display
-            this.statusDot = document.getElementById('statusDot');
-            this.statusText = document.getElementById('connectionText');
-        }
-
-        connect() {
-            this.socket = new WebSocket(this.url);
-
-            this.socket.onopen = () => {
-                this.isConnected = true;
-                this.updateStatus();
-                console.log('Connected to server');
-                this.send({ command: 'step', dt: 0 });
-            };
-
-            this.socket.onclose = () => {
+        // ============================================
+        // CONNECTION CLASS
+        // Manages WebSocket connection to server
+        // ============================================
+        class Connection {
+            constructor(url, onMessage) {
+                this.url = url;
+                this.onMessage = onMessage;
+                this.socket = null;
                 this.isConnected = false;
-                this.updateStatus();
-                console.log('Disconnected - reconnecting...');
-                setTimeout(() => this.connect(), 2000);
-            };
 
-            this.socket.onerror = (error) => {
-                console.error('Connection error:', error);
-            };
+                // DOM elements for status display
+                this.statusDot = document.getElementById('statusDot');
+                this.statusText = document.getElementById('connectionText');
+            }
 
-            this.socket.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    this.onMessage(data);
-                } catch (e) {
-                    console.error('Parse error:', e);
+            connect() {
+                this.socket = new WebSocket(this.url);
+
+                this.socket.onopen = () => {
+                    this.isConnected = true;
+                    this.updateStatus();
+                    console.log('Connected to server');
+                    this.send({ command: 'step', dt: 0 });
+                };
+
+                this.socket.onclose = () => {
+                    this.isConnected = false;
+                    this.updateStatus();
+                    console.log('Disconnected - reconnecting...');
+                    setTimeout(() => this.connect(), 2000);
+                };
+
+                this.socket.onerror = (error) => {
+                    console.error('Connection error:', error);
+                };
+
+                this.socket.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        this.onMessage(data);
+                    } catch (e) {
+                        console.error('Parse error:', e);
+                    }
+                };
+            }
+
+            send(command) {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify(command));
                 }
-            };
-        }
+            }
 
-        send(command) {
-            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-                this.socket.send(JSON.stringify(command));
+            updateStatus() {
+                this.statusDot.classList.toggle('connected', this.isConnected);
+                this.statusText.textContent = this.isConnected ? 'Connected' : 'Disconnected';
             }
         }
 
-        updateStatus() {
-            this.statusDot.classList.toggle('connected', this.isConnected);
-            this.statusText.textContent = this.isConnected ? 'Connected' : 'Disconnected';
-        }
-    }
 
-
-    // ============================================
-    // SIMULATION CLASS
-    // Controls simulation state and timing
-    // ============================================
-    class Simulation {
-        constructor(connection) {
-            this.connection = connection;
-            this.isRunning = false;
-            this.speed = 1.0;
-            this.timer = null;
-
-            // DOM elements
-            this.btnStart = document.getElementById('btnStart');
-            this.btnPause = document.getElementById('btnPause');
-            this.btnReset = document.getElementById('btnReset');
-            this.btnStep = document.getElementById('btnStep');
-            this.stepInput = document.getElementById('stepDt');
-            this.speedSlider = document.getElementById('speedSlider');
-            this.speedDisplay = document.getElementById('speedValue');
-
-            this.bindEvents();
-        }
-
-        bindEvents() {
-            this.btnStart.addEventListener('click', () => this.start());
-            this.btnPause.addEventListener('click', () => this.pause());
-            this.btnReset.addEventListener('click', () => this.reset());
-            this.btnStep.addEventListener('click', () => this.step());
-            this.speedSlider.addEventListener('input', (e) => this.setSpeed(parseFloat(e.target.value)));
-        }
-
-        start() {
-            this.connection.send({ command: 'start' });
-            this.isRunning = true;
-            this.updateButtons();
-            this.startTimer();
-        }
-
-        pause() {
-            this.connection.send({ command: 'pause' });
-            this.isRunning = false;
-            this.updateButtons();
-            this.stopTimer();
-        }
-
-        reset() {
-            this.connection.send({ command: 'reset' });
-            this.isRunning = false;
-            this.updateButtons();
-            this.stopTimer();
-            // Signal to resync own vessel inputs on next update
-            if (window.app) window.app._initialSyncDone = false;
-        }
-
-        step() {
-            const dt = parseFloat(this.stepInput.value) || 0.1;
-            this.connection.send({ command: 'step', dt: dt });
-        }
-
-        setSpeed(speed) {
-            this.speed = speed;
-            this.connection.send({ command: 'speed', value: speed });
-            this.speedDisplay.textContent = speed.toFixed(1) + 'x';
-        }
-
-        updateButtons() {
-            this.btnStart.disabled = this.isRunning;
-            this.btnPause.disabled = !this.isRunning;
-        }
-
-        startTimer() {
-            if (this.timer) return;
-            this.timer = setInterval(() => {
-                if (this.isRunning && this.connection.isConnected) {
-                    const dt = (CONFIG.updateInterval / 1000 / 3600) * this.speed;
-                    this.connection.send({ command: 'step', dt: dt });
-                }
-            }, CONFIG.updateInterval);
-        }
-
-        stopTimer() {
-            if (this.timer) {
-                clearInterval(this.timer);
+        // ============================================
+        // SIMULATION CLASS
+        // Controls simulation state and timing
+        // ============================================
+        class Simulation {
+            constructor(connection) {
+                this.connection = connection;
+                this.isRunning = false;
+                this.speed = 1.0;
                 this.timer = null;
+
+                // DOM elements
+                this.btnStart = document.getElementById('btnStart');
+                this.btnPause = document.getElementById('btnPause');
+                this.btnReset = document.getElementById('btnReset');
+                this.btnStep = document.getElementById('btnStep');
+                this.stepInput = document.getElementById('stepDt');
+                this.speedSlider = document.getElementById('speedSlider');
+                this.speedDisplay = document.getElementById('speedValue');
+
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                this.btnStart.addEventListener('click', () => this.start());
+                this.btnPause.addEventListener('click', () => this.pause());
+                this.btnReset.addEventListener('click', () => this.reset());
+                this.btnStep.addEventListener('click', () => this.step());
+                this.speedSlider.addEventListener('input', (e) => this.setSpeed(parseFloat(e.target.value)));
+            }
+
+            start() {
+                this.connection.send({ command: 'start' });
+                this.isRunning = true;
+                this.updateButtons();
+                this.startTimer();
+            }
+
+            pause() {
+                this.connection.send({ command: 'pause' });
+                this.isRunning = false;
+                this.updateButtons();
+                this.stopTimer();
+            }
+
+            reset() {
+                this.connection.send({ command: 'reset' });
+                this.isRunning = false;
+                this.updateButtons();
+                this.stopTimer();
+                // Signal to resync own vessel inputs on next update
+                if (window.app) window.app._initialSyncDone = false;
+            }
+
+            step() {
+                const dt = parseFloat(this.stepInput.value) || 0.1;
+                this.connection.send({ command: 'step', dt: dt });
+            }
+
+            setSpeed(speed) {
+                this.speed = speed;
+                this.connection.send({ command: 'speed', value: speed });
+                this.speedDisplay.textContent = speed.toFixed(1) + 'x';
+            }
+
+            updateButtons() {
+                this.btnStart.disabled = this.isRunning;
+                this.btnPause.disabled = !this.isRunning;
+            }
+
+            startTimer() {
+                if (this.timer) return;
+                this.timer = setInterval(() => {
+                    if (this.isRunning && this.connection.isConnected) {
+                        const dt = (CONFIG.updateInterval / 1000 / 3600) * this.speed;
+                        this.connection.send({ command: 'step', dt: dt });
+                    }
+                }, CONFIG.updateInterval);
+            }
+
+            stopTimer() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
             }
         }
-    }
 
 
-    // ============================================
-    // OWN VESSEL CONTROLLER CLASS
-    // Handles own vessel speed and heading changes
-    // ============================================
-    class OwnVesselController {
-        constructor(connection) {
-            this.connection = connection;
 
-            // DOM elements
-            this.speedInput = document.getElementById('ownSpeedInput');
-            this.headingInput = document.getElementById('ownHeadingInput');
-            this.btnUpdateSpeed = document.getElementById('btnUpdateOwnSpeed');
-            this.btnUpdateHeading = document.getElementById('btnUpdateOwnHeading');
+        // OWN VESSEL CONTROLLER CLASS
+        // Handles own vessel speed and heading changes
+        //---------------------------------------------------------
+        class OwnVesselController {
+            constructor(connection) {
+                this.connection = connection;
 
-            this.bindEvents();
-        }
+                // DOM elements
+                this.speedInput = document.getElementById('ownSpeedInput');
+                this.headingInput = document.getElementById('ownHeadingInput');
+                this.btnUpdateSpeed = document.getElementById('btnUpdateOwnSpeed');
+                this.btnUpdateHeading = document.getElementById('btnUpdateOwnHeading');
 
-        bindEvents() {
-            this.btnUpdateSpeed.addEventListener('click', () => this.updateSpeed());
-            this.btnUpdateHeading.addEventListener('click', () => this.updateHeading());
-
-            // Enter key triggers update
-            this.speedInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') this.updateSpeed();
-            });
-            this.headingInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') this.updateHeading();
-            });
-        }
-
-        updateSpeed() {
-            const speed = parseFloat(this.speedInput.value);
-            if (!isNaN(speed) && speed >= 0) {
-                this.connection.send({ command: 'update_own_speed', speed_knots: speed });
+                this.bindEvents();
             }
-        }
 
-        updateHeading() {
-            let heading = parseFloat(this.headingInput.value);
-            if (!isNaN(heading)) {
-                // Normalize heading to 0-359
-                heading = ((heading % 360) + 360) % 360;
-                this.headingInput.value = heading;
-                this.connection.send({ command: 'update_own_heading', heading_deg: heading });
-            }
-        }
+            bindEvents() {
+                this.btnUpdateSpeed.addEventListener('click', () => this.updateSpeed());
+                this.btnUpdateHeading.addEventListener('click', () => this.updateHeading());
 
-        // Update input fields when server data arrives
-        syncFromServer(own) {
-            if (!own) return;
-            this.speedInput.value = own.speed_knots.toFixed(1);
-            this.headingInput.value = own.heading_deg.toFixed(0);
-        }
-    }
-
-
-    // ============================================
-    // TARGET MANAGER CLASS
-    // Handles adding, removing, and updating targets
-    // ============================================
-    class TargetManager {
-        constructor(connection) {
-            this.connection = connection;
-
-            // Form elements
-            this.inputId = document.getElementById('newTargetId');
-            this.inputX = document.getElementById('newTargetX');
-            this.inputY = document.getElementById('newTargetY');
-            this.inputSpeed = document.getElementById('newTargetSpeed');
-            this.inputHeading = document.getElementById('newTargetHeading');
-            this.btnAdd = document.getElementById('btnAddTarget');
-
-            this.bindEvents();
-            this.setupEventListeners();
-        }
-
-        bindEvents() {
-            this.btnAdd.addEventListener('click', () => this.add());
-            
-            // Enter key submits form
-            const inputs = [this.inputId, this.inputX, this.inputY, this.inputSpeed, this.inputHeading];
-            inputs.forEach(input => {
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') this.add();
+                // Enter key triggers update
+                this.speedInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.updateSpeed();
                 });
-            });
-        }
-
-        add() {
-            const id = this.inputId.value.trim();
-            const x = parseFloat(this.inputX.value);
-            const y = parseFloat(this.inputY.value);
-            const speed = parseFloat(this.inputSpeed.value);
-            const heading = parseFloat(this.inputHeading.value);
-
-            if (!id || isNaN(x) || isNaN(y) || isNaN(speed) || isNaN(heading)) {
-                alert('Please fill in all fields with valid values');
-                return;
-            }
-
-            this.connection.send({
-                command: 'add_target',
-                id, x, y, speed, heading
-            });
-
-            this.clearForm();
-        }
-
-        remove(targetId) {
-            this.connection.send({ command: 'remove_target', id: targetId });
-        }
-
-        clearForm() {
-            this.inputId.value = '';
-            this.inputX.value = '';
-            this.inputY.value = '';
-            this.inputSpeed.value = '';
-            this.inputHeading.value = '';
-        }
-
-        // ----------------------------------------
-        // Update target speed
-        // ----------------------------------------
-        updateSpeed(targetId, speed) {
-            if (!isNaN(speed) && speed >= 0) {
-                this.connection.send({ 
-                    command: 'update_target_speed', 
-                    id: targetId, 
-                    speed_knots: speed 
+                this.headingInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.updateHeading();
                 });
             }
+
+            updateSpeed() {
+                const speed = parseFloat(this.speedInput.value);
+                if (!isNaN(speed) && speed >= 0) {
+                    this.connection.send({ command: 'update_own_speed', speed_knots: speed });
+                }
+            }
+
+            updateHeading() {
+                let heading = parseFloat(this.headingInput.value);
+                if (!isNaN(heading)) {
+                    // Normalize heading to 0-359
+                    heading = ((heading % 360) + 360) % 360;
+                    this.headingInput.value = heading;
+                    this.connection.send({ command: 'update_own_heading', heading_deg: heading });
+                }
+            }
+
+            // Update input fields when server data arrives
+            syncFromServer(own) {
+                if (!own) return;
+                this.speedInput.value = own.speed_knots.toFixed(1);
+                this.headingInput.value = own.heading_deg.toFixed(0);
+            }
         }
 
-        // ----------------------------------------
-        // Update target heading
-        // ----------------------------------------
-        updateHeading(targetId, heading) {
-            if (!isNaN(heading)) {
-                // Normalize heading to 0-359
-                heading = ((heading % 360) + 360) % 360;
-                this.connection.send({ 
-                    command: 'update_target_heading', 
-                    id: targetId, 
-                    heading_deg: heading 
+
+
+        // TARGET MANAGER CLASS
+        // Handles adding, removing, and updating targets
+        // -----------------------------------------------------
+        class TargetManager {
+            constructor(connection) {
+                this.connection = connection;
+
+                // Form elements
+                this.inputId = document.getElementById('newTargetId');
+                this.inputX = document.getElementById('newTargetX');
+                this.inputY = document.getElementById('newTargetY');
+                this.inputSpeed = document.getElementById('newTargetSpeed');
+                this.inputHeading = document.getElementById('newTargetHeading');
+                this.btnAdd = document.getElementById('btnAddTarget');
+
+                this.bindEvents();
+                this.setupEventListeners();
+            }
+
+            bindEvents() {
+                this.btnAdd.addEventListener('click', () => this.add());
+
+                // Enter key submits form
+                const inputs = [this.inputId, this.inputX, this.inputY, this.inputSpeed, this.inputHeading];
+                inputs.forEach(input => {
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') this.add();
+                    });
+                });
+            }
+
+            add() {
+                const id = this.inputId.value.trim();
+                const x = parseFloat(this.inputX.value);
+                const y = parseFloat(this.inputY.value);
+                const speed = parseFloat(this.inputSpeed.value);
+                const heading = parseFloat(this.inputHeading.value);
+
+                if (!id || isNaN(x) || isNaN(y) || isNaN(speed) || isNaN(heading)) {
+                    alert('Please fill in all fields with valid values');
+                    return;
+                }
+
+                this.connection.send({
+                    command: 'add_target',
+                    id, x, y, speed, heading
+                });
+
+                this.clearForm();
+            }
+
+            remove(targetId) {
+                this.connection.send({ command: 'remove_target', id: targetId });
+            }
+
+            clearForm() {
+                this.inputId.value = '';
+                this.inputX.value = '';
+                this.inputY.value = '';
+                this.inputSpeed.value = '';
+                this.inputHeading.value = '';
+            }
+
+
+            // Update target speed
+            // ----------------------------------------
+            updateSpeed(targetId, speed) {
+                if (!isNaN(speed) && speed >= 0) {
+                    this.connection.send({
+                        command: 'update_target_speed',
+                        id: targetId,
+                        speed_knots: speed
+                    });
+                }
+            }
+
+
+            // Update target heading
+            // ----------------------------------------
+            updateHeading(targetId, heading) {
+                if (!isNaN(heading)) {
+                    // Normalize heading to 0-359
+                    heading = ((heading % 360) + 360) % 360;
+                    this.connection.send({
+                        command: 'update_target_heading',
+                        id: targetId,
+                        heading_deg: heading
+                    });
+                }
+            }
+
+
+            // Event delegation for target buttons
+            // Called once to handle all dynamically created buttons
+            // ----------------------------------------
+            setupEventListeners() {
+                document.addEventListener('click', (e) => {
+                    // Remove target button
+                    if (e.target.matches('.remove-target-btn')) {
+                        const targetId = e.target.dataset.targetId;
+                        this.remove(targetId);
+                    }
+
+                    // Update target button
+                    if (e.target.matches('.update-target-btn')) {
+                        const targetId = e.target.dataset.targetId;
+                        const row = e.target.closest('.target');
+                        const speedInput = row.querySelector('.target-speed-input');
+                        const headingInput = row.querySelector('.target-heading-input');
+
+                        const speed = parseFloat(speedInput.value);
+                        const heading = parseFloat(headingInput.value);
+
+                        this.updateSpeed(targetId, speed);
+                        this.updateHeading(targetId, heading);
+                    }
+                });
+
+                // Enter key in target inputs triggers update
+                document.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && (e.target.matches('.target-speed-input') || e.target.matches('.target-heading-input'))) {
+                        const row = e.target.closest('.target');
+                        const updateBtn = row.querySelector('.update-target-btn');
+                        if (updateBtn) updateBtn.click();
+                    }
                 });
             }
         }
 
-        // ----------------------------------------
-        // Event delegation for target buttons
-        // Called once to handle all dynamically created buttons
-        // ----------------------------------------
-        setupEventListeners() {
-            document.addEventListener('click', (e) => {
-                // Remove target button
-                if (e.target.matches('.remove-target-btn')) {
-                    const targetId = e.target.dataset.targetId;
-                    this.remove(targetId);
-                }
-                
-                // Update target button
-                if (e.target.matches('.update-target-btn')) {
-                    const targetId = e.target.dataset.targetId;
-                    const row = e.target.closest('.target');
-                    const speedInput = row.querySelector('.target-speed-input');
-                    const headingInput = row.querySelector('.target-heading-input');
-                    
-                    const speed = parseFloat(speedInput.value);
-                    const heading = parseFloat(headingInput.value);
-                    
-                    this.updateSpeed(targetId, speed);
-                    this.updateHeading(targetId, heading);
-                }
-            });
-
-            // Enter key in target inputs triggers update
-            document.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && (e.target.matches('.target-speed-input') || e.target.matches('.target-heading-input'))) {
-                    const row = e.target.closest('.target');
-                    const updateBtn = row.querySelector('.update-target-btn');
-                    if (updateBtn) updateBtn.click();
-                }
-            });
-        }
-    }
 
 
-    // ============================================
-    // VIEWPORT CLASS
-    // Handles zoom and pan for radar view
-    // ============================================
-    class Viewport {
-        constructor(canvas, onUpdate) {
-            this.canvas = canvas;
-            this.onUpdate = onUpdate;
-            
-            this.zoom = CONFIG.defaultZoom;
-            this.panX = 0;
-            this.panY = 0;
-            this.isDragging = false;
-            this.dragStartX = 0;
-            this.dragStartY = 0;
+        // VIEWPORT CLASS
+        // Handles zoom and pan for radar view
+        // ----------------------------------------------------
+        class Viewport {
+            constructor(canvas, onUpdate) {
+                this.canvas = canvas;
+                this.onUpdate = onUpdate;
 
-            // DOM elements
-            this.zoomDisplay = document.getElementById('zoomLevel');
-            this.scaleDisplay = document.getElementById('scaleValue');
-            this.btnZoomIn = document.getElementById('zoomIn');
-            this.btnZoomOut = document.getElementById('zoomOut');
-            this.btnReset = document.getElementById('resetView');
+                this.zoom = CONFIG.defaultZoom;
+                this.panX = 0;
+                this.panY = 0;
+                this.isDragging = false;
+                this.dragStartX = 0;
+                this.dragStartY = 0;
 
-            this.bindEvents();
-        }
+                // DOM elements
+                this.zoomDisplay = document.getElementById('zoomLevel');
+                this.scaleDisplay = document.getElementById('scaleValue');
+                this.btnZoomIn = document.getElementById('zoomIn');
+                this.btnZoomOut = document.getElementById('zoomOut');
+                this.btnReset = document.getElementById('resetView');
 
-        bindEvents() {
-            // Zoom buttons
-            this.btnZoomIn.addEventListener('click', () => this.zoomBy(2));
-            this.btnZoomOut.addEventListener('click', () => this.zoomBy(-2));
-            this.btnReset.addEventListener('click', () => this.reset());
+                this.bindEvents();
+            }
 
-            // Mouse wheel zoom
-            this.canvas.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                this.zoomBy(e.deltaY > 0 ? -1 : 1);
-            });
+            bindEvents() {
+                // Zoom buttons
+                this.btnZoomIn.addEventListener('click', () => this.zoomBy(2));
+                this.btnZoomOut.addEventListener('click', () => this.zoomBy(-2));
+                this.btnReset.addEventListener('click', () => this.reset());
 
-            // Mouse drag to pan
-            this.canvas.addEventListener('mousedown', (e) => {
-                this.isDragging = true;
-                this.dragStartX = e.clientX - this.panX;
-                this.dragStartY = e.clientY - this.panY;
-                this.canvas.style.cursor = 'grabbing';
-            });
+                // Mouse wheel zoom
+                this.canvas.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    this.zoomBy(e.deltaY > 0 ? -1 : 1);
+                });
 
-            this.canvas.addEventListener('mousemove', (e) => {
-                if (!this.isDragging) return;
-                this.panX = e.clientX - this.dragStartX;
-                this.panY = e.clientY - this.dragStartY;
+                // Mouse drag to pan
+                this.canvas.addEventListener('mousedown', (e) => {
+                    this.isDragging = true;
+                    this.dragStartX = e.clientX - this.panX;
+                    this.dragStartY = e.clientY - this.panY;
+                    this.canvas.style.cursor = 'grabbing';
+                });
+
+                this.canvas.addEventListener('mousemove', (e) => {
+                    if (!this.isDragging) return;
+                    this.panX = e.clientX - this.dragStartX;
+                    this.panY = e.clientY - this.dragStartY;
+                    this.onUpdate();
+                });
+
+                this.canvas.addEventListener('mouseup', () => this.stopDrag());
+                this.canvas.addEventListener('mouseleave', () => this.stopDrag());
+            }
+
+            zoomBy(delta) {
+                this.zoom = Math.max(CONFIG.minZoom, Math.min(CONFIG.maxZoom, this.zoom * (1 + delta * 0.1)));
+                this.updateDisplay();
                 this.onUpdate();
-            });
-
-            this.canvas.addEventListener('mouseup', () => this.stopDrag());
-            this.canvas.addEventListener('mouseleave', () => this.stopDrag());
-        }
-
-        zoomBy(delta) {
-            this.zoom = Math.max(CONFIG.minZoom, Math.min(CONFIG.maxZoom, this.zoom * (1 + delta * 0.1)));
-            this.updateDisplay();
-            this.onUpdate();
-        }
-
-        reset() {
-            this.zoom = CONFIG.defaultZoom;
-            this.panX = 0;
-            this.panY = 0;
-            this.updateDisplay();
-            this.onUpdate();
-        }
-
-        stopDrag() {
-            this.isDragging = false;
-            this.canvas.style.cursor = 'grab';
-        }
-
-        updateDisplay() {
-            this.zoomDisplay.textContent = (this.zoom / CONFIG.defaultZoom).toFixed(1) + 'x';
-        }
-
-        updateScaleBar() {
-            const distanceNm = 100 / this.zoom;
-            let text;
-            if (distanceNm >= 5) {
-                text = `${Math.round(distanceNm / 5) * 5} nm`;
-            } else if (distanceNm >= 1) {
-                text = `${Math.round(distanceNm)} nm`;
-            } else {
-                text = `${distanceNm.toFixed(1)} nm`;
-            }
-            this.scaleDisplay.textContent = text;
-        }
-    }
-
-
-    // ============================================
-    // RADAR RENDERER CLASS
-    // Draws the radar display on canvas
-    // ============================================
-    class RadarRenderer {
-        constructor(canvas, viewport) {
-            this.canvas = canvas;
-            this.ctx = canvas.getContext('2d');
-            this.viewport = viewport;
-            this.container = document.getElementById('radarContainer');
-            
-            window.addEventListener('resize', () => this.resize());
-            this.resize();
-        }
-
-        resize() {
-            this.canvas.width = this.container.clientWidth;
-            this.canvas.height = this.container.clientHeight;
-        }
-
-        render(world) {
-            const width = this.canvas.width;
-            const height = this.canvas.height;
-            const zoom = this.viewport.zoom;
-            const panX = this.viewport.panX;
-            const panY = this.viewport.panY;
-
-            // Calculate center (own vessel position)
-            const ownOffsetX = world.own ? world.own.position.x * zoom : 0;
-            const ownOffsetY = world.own ? world.own.position.y * zoom : 0;
-            const centerX = width / 2 + panX - ownOffsetX;
-            const centerY = height / 2 + panY + ownOffsetY;
-            const viewCenterX = width / 2 + panX;
-            const viewCenterY = height / 2 + panY;
-
-            // Clear canvas
-            this.ctx.fillStyle = COLORS.background;
-            this.ctx.fillRect(0, 0, width, height);
-
-            // Draw layers
-            this.drawGrid(viewCenterX, viewCenterY, width, height);
-            this.drawRangeRings(viewCenterX, viewCenterY);
-
-            // Draw vessels
-            if (world.targets) {
-                world.targets.forEach(t => this.drawVessel(t, centerX, centerY, false));
-            }
-            if (world.own) {
-                this.drawVessel(world.own, centerX, centerY, true);
             }
 
-            this.viewport.updateScaleBar();
-        }
-
-        drawGrid(centerX, centerY, width, height) {
-            const zoom = this.viewport.zoom;
-            const ctx = this.ctx;
-
-            // Minor grid (1 nm)
-            ctx.strokeStyle = COLORS.grid;
-            ctx.lineWidth = 0.5;
-            this.drawGridLines(centerX, centerY, width, height, zoom);
-
-            // Major grid (5 nm)
-            ctx.strokeStyle = COLORS.gridMajor;
-            ctx.lineWidth = 1;
-            this.drawGridLines(centerX, centerY, width, height, zoom * 5);
-        }
-
-        drawGridLines(centerX, centerY, width, height, spacing) {
-            const ctx = this.ctx;
-
-            // Vertical lines
-            for (let x = centerX % spacing; x < width; x += spacing) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, height);
-                ctx.stroke();
+            reset() {
+                this.zoom = CONFIG.defaultZoom;
+                this.panX = 0;
+                this.panY = 0;
+                this.updateDisplay();
+                this.onUpdate();
             }
 
-            // Horizontal lines
-            for (let y = centerY % spacing; y < height; y += spacing) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(width, y);
-                ctx.stroke();
+            stopDrag() {
+                this.isDragging = false;
+                this.canvas.style.cursor = 'grab';
+            }
+
+            updateDisplay() {
+                this.zoomDisplay.textContent = (this.zoom / CONFIG.defaultZoom).toFixed(1) + 'x';
+            }
+
+            updateScaleBar() {
+                const distanceNm = 100 / this.zoom;
+                let text;
+                if (distanceNm >= 5) {
+                    text = `${Math.round(distanceNm / 5) * 5} nm`;
+                } else if (distanceNm >= 1) {
+                    text = `${Math.round(distanceNm)} nm`;
+                } else {
+                    text = `${distanceNm.toFixed(1)} nm`;
+                }
+                this.scaleDisplay.textContent = text;
             }
         }
 
-        drawRangeRings(centerX, centerY) {
-            const ctx = this.ctx;
-            const zoom = this.viewport.zoom;
 
-            ctx.strokeStyle = COLORS.gridMajor;
-            ctx.lineWidth = 1;
-            ctx.setLineDash([5, 5]);
 
-            [1, 2, 5, 10].forEach(range => {
-                const radius = range * zoom;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-                ctx.stroke();
+        // RADAR RENDERER CLASS
+        // Draws the radar display on canvas
+        // -------------------------------------------------------
+        class RadarRenderer {
+            constructor(canvas, viewport) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.viewport = viewport;
+                this.container = document.getElementById('radarContainer');
 
-                ctx.fillStyle = COLORS.text;
-                ctx.font = '11px sans-serif';
-                ctx.fillText(`${range} nm`, centerX + radius + 5, centerY);
-            });
-
-            ctx.setLineDash([]);
-        }
-
-        drawVessel(vessel, centerX, centerY, isOwn) {
-            const ctx = this.ctx;
-            const zoom = this.viewport.zoom;
-
-            // Position
-            const x = centerX + vessel.position.x * zoom;
-            const y = centerY - vessel.position.y * zoom;
-
-            // Color based on risk
-            let color = COLORS.safe;
-            if (isOwn) {
-                color = COLORS.own;
-            } else if (vessel.alert) {
-                color = vessel.alert.risk === 'DANGER' ? COLORS.danger :
-                        vessel.alert.risk === 'WARNING' ? COLORS.warning : COLORS.safe;
+                window.addEventListener('resize', () => this.resize());
+                this.resize();
             }
 
-            // Velocity vector
-            const headingRad = vessel.heading_deg * Math.PI / 180;
-            const vectorLen = vessel.speed_knots * zoom * 0.1;
-            const vx = Math.sin(headingRad) * vectorLen;
-            const vy = -Math.cos(headingRad) * vectorLen;
-
-            ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + vx, y + vy);
-            ctx.stroke();
-
-            // Vessel shape
-            const size = isOwn ? 14 : 10;
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(headingRad);
-
-            // Triangle
-            ctx.beginPath();
-            ctx.moveTo(0, -size);
-            ctx.lineTo(-size * 0.6, size * 0.6);
-            ctx.lineTo(size * 0.6, size * 0.6);
-            ctx.closePath();
-            ctx.fillStyle = color;
-            ctx.fill();
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            ctx.restore();
-
-            // Label
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 11px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(vessel.id, x, y + size + 14);
-
-            // Alert info
-            if (!isOwn && vessel.alert && vessel.alert.risk !== 'SAFE') {
-                ctx.font = '9px sans-serif';
-                ctx.fillStyle = color;
-                ctx.fillText(vessel.alert.text || '', x, y + size + 26);
-            }
-        }
-    }
-
-
-    // ============================================
-    // UI UPDATER CLASS
-    // Updates sidebar displays
-    // ============================================
-    class UIUpdater {
-        constructor() {
-            this.ownPosition = document.getElementById('ownPosition');
-            this.alertList = document.getElementById('alertList');
-            this.targetList = document.getElementById('targetList');
-        }
-
-        update(world) {
-            this.updateOwnVessel(world.own);
-            this.updateAlerts(world.alerts);
-            this.updateTargets(world.targets);
-        }
-
-        updateOwnVessel(own) {
-            if (!own) return;
-            this.ownPosition.textContent = `(${own.position.x.toFixed(2)}, ${own.position.y.toFixed(2)}) nm`;
-        }
-
-        updateAlerts(alerts) {
-            if (!alerts || alerts.length === 0) {
-                this.alertList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No active alerts</p>';
-                return;
+            resize() {
+                this.canvas.width = this.container.clientWidth;
+                this.canvas.height = this.container.clientHeight;
             }
 
-            this.alertList.innerHTML = alerts.map(alert => {
-                const risk = alert.risk.toLowerCase();
-                const cpa = alert.cpa_nm !== null ? `CPA: ${alert.cpa_nm.toFixed(2)} nm` : 'No CPA';
-                let tcpa = '';
-                if (alert.tcpa_hours !== null) {
-                    tcpa = alert.tcpa_hours >= 0 
-                        ? `TCPA: ${(alert.tcpa_hours * 60).toFixed(1)} min` 
-                        : 'Opening';
+            render(world) {
+                const width = this.canvas.width;
+                const height = this.canvas.height;
+                const zoom = this.viewport.zoom;
+                const panX = this.viewport.panX;
+                const panY = this.viewport.panY;
+
+                // Calculate center (own vessel position)
+                const ownOffsetX = world.own ? world.own.position.x * zoom : 0;
+                const ownOffsetY = world.own ? world.own.position.y * zoom : 0;
+                const centerX = width / 2 + panX - ownOffsetX;
+                const centerY = height / 2 + panY + ownOffsetY;
+                const viewCenterX = width / 2 + panX;
+                const viewCenterY = height / 2 + panY;
+
+                // Clear canvas
+                this.ctx.fillStyle = COLORS.background;
+                this.ctx.fillRect(0, 0, width, height);
+
+                // Draw layers
+                this.drawGrid(viewCenterX, viewCenterY, width, height);
+                this.drawRangeRings(viewCenterX, viewCenterY);
+
+                // Draw vessels
+                if (world.targets) {
+                    world.targets.forEach(t => this.drawVessel(t, centerX, centerY, false));
+                }
+                if (world.own) {
+                    this.drawVessel(world.own, centerX, centerY, true);
                 }
 
-                return `
+                this.viewport.updateScaleBar();
+            }
+
+            drawGrid(centerX, centerY, width, height) {
+                const zoom = this.viewport.zoom;
+                const ctx = this.ctx;
+
+                // Minor grid (1 nm)
+                ctx.strokeStyle = COLORS.grid;
+                ctx.lineWidth = 0.5;
+                this.drawGridLines(centerX, centerY, width, height, zoom);
+
+                // Major grid (5 nm)
+                ctx.strokeStyle = COLORS.gridMajor;
+                ctx.lineWidth = 1;
+                this.drawGridLines(centerX, centerY, width, height, zoom * 5);
+            }
+
+            drawGridLines(centerX, centerY, width, height, spacing) {
+                const ctx = this.ctx;
+
+                // Vertical lines
+                for (let x = centerX % spacing; x < width; x += spacing) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, height);
+                    ctx.stroke();
+                }
+
+                // Horizontal lines
+                for (let y = centerY % spacing; y < height; y += spacing) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                }
+            }
+
+            drawRangeRings(centerX, centerY) {
+                const ctx = this.ctx;
+                const zoom = this.viewport.zoom;
+
+                ctx.strokeStyle = COLORS.gridMajor;
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+
+                [1, 2, 5, 10].forEach(range => {
+                    const radius = range * zoom;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    ctx.fillStyle = COLORS.text;
+                    ctx.font = '11px sans-serif';
+                    ctx.fillText(`${range} nm`, centerX + radius + 5, centerY);
+                });
+
+                ctx.setLineDash([]);
+            }
+
+            drawVessel(vessel, centerX, centerY, isOwn) {
+                const ctx = this.ctx;
+                const zoom = this.viewport.zoom;
+
+                // Position
+                const x = centerX + vessel.position.x * zoom;
+                const y = centerY - vessel.position.y * zoom;
+
+                // Color based on risk
+                let color = COLORS.safe;
+                if (isOwn) {
+                    color = COLORS.own;
+                } else if (vessel.alert) {
+                    color = vessel.alert.risk === 'DANGER' ? COLORS.danger :
+                        vessel.alert.risk === 'WARNING' ? COLORS.warning : COLORS.safe;
+                }
+
+                // Velocity vector
+                const headingRad = vessel.heading_deg * Math.PI / 180;
+                const vectorLen = vessel.speed_knots * zoom * 0.1;
+                const vx = Math.sin(headingRad) * vectorLen;
+                const vy = -Math.cos(headingRad) * vectorLen;
+
+                ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + vx, y + vy);
+                ctx.stroke();
+
+                // Vessel shape
+                const size = isOwn ? 14 : 10;
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(headingRad);
+
+                // Triangle
+                ctx.beginPath();
+                ctx.moveTo(0, -size);
+                ctx.lineTo(-size * 0.6, size * 0.6);
+                ctx.lineTo(size * 0.6, size * 0.6);
+                ctx.closePath();
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                ctx.restore();
+
+                // Label
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(vessel.id, x, y + size + 14);
+
+                // Alert info
+                if (!isOwn && vessel.alert && vessel.alert.risk !== 'SAFE') {
+                    ctx.font = '9px sans-serif';
+                    ctx.fillStyle = color;
+                    ctx.fillText(vessel.alert.text || '', x, y + size + 26);
+                }
+            }
+        }
+
+
+
+        // UI UPDATER CLASS
+        // Updates sidebar displays
+        // -----------------------------------------------
+        class UIUpdater {
+            constructor() {
+                this.ownPosition = document.getElementById('ownPosition');
+                this.alertList = document.getElementById('alertList');
+                this.targetList = document.getElementById('targetList');
+            }
+
+            update(world) {
+                this.updateOwnVessel(world.own);
+                this.updateAlerts(world.alerts);
+                this.updateTargets(world.targets);
+            }
+
+            updateOwnVessel(own) {
+                if (!own) return;
+                this.ownPosition.textContent = `(${own.position.x.toFixed(2)}, ${own.position.y.toFixed(2)}) nm`;
+            }
+
+            updateAlerts(alerts) {
+                if (!alerts || alerts.length === 0) {
+                    this.alertList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No active alerts</p>';
+                    return;
+                }
+
+                this.alertList.innerHTML = alerts.map(alert => {
+                    const risk = alert.risk.toLowerCase();
+                    const cpa = alert.cpa_nm !== null ? `CPA: ${alert.cpa_nm.toFixed(2)} nm` : 'No CPA';
+                    let tcpa = '';
+                    if (alert.tcpa_hours !== null) {
+                        tcpa = alert.tcpa_hours >= 0
+                            ? `TCPA: ${(alert.tcpa_hours * 60).toFixed(1)} min`
+                            : 'Opening';
+                    }
+
+                    return `
                     <div class="alert ${risk}">
                         <div class="alert-header">
                             <span class="alert-target">Target ${alert.target_id}</span>
@@ -960,43 +1316,43 @@
                         <div class="alert-details">${cpa}${tcpa ? ' • ' + tcpa : ''}</div>
                     </div>
                 `;
-            }).join('');
-        }
-
-        updateTargets(targets) {
-            if (!targets || targets.length === 0) {
-                this.targetList.innerHTML = '<p style="color: #999; text-align: center; padding: 10px;">No targets</p>';
-                return;
+                }).join('');
             }
 
-            // Check if we need to rebuild (different target count or IDs)
-            const existingIds = Array.from(this.targetList.querySelectorAll('.target'))
-                .map(el => el.dataset.targetId);
-            const newIds = targets.map(t => t.id);
-            const needsRebuild = existingIds.length !== newIds.length || 
-                !existingIds.every((id, i) => id === newIds[i]);
+            updateTargets(targets) {
+                if (!targets || targets.length === 0) {
+                    this.targetList.innerHTML = '<p style="color: #999; text-align: center; padding: 10px;">No targets</p>';
+                    return;
+                }
 
-            if (needsRebuild) {
-                // Full rebuild needed - render with current values
-                this.targetList.innerHTML = targets.map(t => this._renderTargetHtml(t)).join('');
-            } else {
-                // Update only position (not speed/heading inputs) - keep user values intact
-                targets.forEach(t => {
-                    const row = this.targetList.querySelector(`.target[data-target-id="${t.id}"]`);
-                    if (!row) return;
+                // Check if we need to rebuild (different target count or IDs)
+                const existingIds = Array.from(this.targetList.querySelectorAll('.target'))
+                    .map(el => el.dataset.targetId);
+                const newIds = targets.map(t => t.id);
+                const needsRebuild = existingIds.length !== newIds.length ||
+                    !existingIds.every((id, i) => id === newIds[i]);
 
-                    // Always update position display
-                    const infoEl = row.querySelector('.target-info');
-                    if (infoEl) {
-                        infoEl.textContent = `Position: (${t.position.x.toFixed(2)}, ${t.position.y.toFixed(2)}) nm`;
-                    }
-                    // Speed and heading inputs are NOT updated - user controls them
-                });
+                if (needsRebuild) {
+                    // Full rebuild needed - render with current values
+                    this.targetList.innerHTML = targets.map(t => this._renderTargetHtml(t)).join('');
+                } else {
+                    // Update only position (not speed/heading inputs) - keep user values intact
+                    targets.forEach(t => {
+                        const row = this.targetList.querySelector(`.target[data-target-id="${t.id}"]`);
+                        if (!row) return;
+
+                        // Always update position display
+                        const infoEl = row.querySelector('.target-info');
+                        if (infoEl) {
+                            infoEl.textContent = `Position: (${t.position.x.toFixed(2)}, ${t.position.y.toFixed(2)}) nm`;
+                        }
+                        // Speed and heading inputs are NOT updated - user controls them
+                    });
+                }
             }
-        }
 
-        _renderTargetHtml(t) {
-            return `
+            _renderTargetHtml(t) {
+                return `
                 <div class="target" data-target-id="${t.id}">
                     <div class="target-header">
                         <span class="target-id">${t.id}</span>
@@ -1016,57 +1372,58 @@
                     </div>
                 </div>
             `;
-        }
-    }
-
-
-    // ============================================
-    // APPLICATION CLASS
-    // Main app that ties everything together
-    // ============================================
-    class Application {
-        constructor() {
-            this.world = { own: null, targets: [], alerts: [] };
-
-            // Initialize components
-            this.connection = new Connection(CONFIG.serverUrl, (data) => this.onServerUpdate(data));
-            this.simulation = new Simulation(this.connection);
-            this.targetManager = new TargetManager(this.connection);
-            this.ownVesselController = new OwnVesselController(this.connection);
-            
-            const canvas = document.getElementById('radarCanvas');
-            this.viewport = new Viewport(canvas, () => this.render());
-            this.renderer = new RadarRenderer(canvas, this.viewport);
-            this.ui = new UIUpdater();
-        }
-
-        start() {
-            this.connection.connect();
-        }
-
-        onServerUpdate(data) {
-            this.world = data;
-            this.ui.update(this.world);
-            // Don't overwrite user input - only sync on initial load
-            if (!this._initialSyncDone && data.own) {
-                this.ownVesselController.syncFromServer(data.own);
-                this._initialSyncDone = true;
             }
-            this.render();
         }
 
-        render() {
-            this.renderer.render(this.world);
+
+
+        // APPLICATION CLASS
+        // Main app that ties everything together
+        // -----------------------------------------------------
+        class Application {
+            constructor() {
+                this.world = { own: null, targets: [], alerts: [] };
+
+                // Initialize components
+                this.connection = new Connection(CONFIG.serverUrl, (data) => this.onServerUpdate(data));
+                this.simulation = new Simulation(this.connection);
+                this.targetManager = new TargetManager(this.connection);
+                this.ownVesselController = new OwnVesselController(this.connection);
+
+                const canvas = document.getElementById('radarCanvas');
+                this.viewport = new Viewport(canvas, () => this.render());
+                this.renderer = new RadarRenderer(canvas, this.viewport);
+                this.ui = new UIUpdater();
+            }
+
+            start() {
+                this.connection.connect();
+            }
+
+            onServerUpdate(data) {
+                this.world = data;
+                this.ui.update(this.world);
+                // Don't overwrite user input - only sync on initial load
+                if (!this._initialSyncDone && data.own) {
+                    this.ownVesselController.syncFromServer(data.own);
+                    this._initialSyncDone = true;
+                }
+                this.render();
+            }
+
+            render() {
+                this.renderer.render(this.world);
+            }
         }
-    }
 
 
-    // ============================================
-    // START APPLICATION
-    // ============================================
-    const app = new Application();
-    app.start();
+
+        // START APPLICATION
+        // ---------------------------------------------------------
+        const app = new Application();
+        app.start();
 
     </script>
 </body>
+
 </html>

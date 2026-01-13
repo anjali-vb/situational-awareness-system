@@ -12,17 +12,17 @@ class World:
         self.own = own
         self.targets = list(targets)
 
-    # ----------------------------
+    
     # Simulation
-    # ----------------------------
+    
     def step(self, dt_hours: float) -> None:
         self.own.step(dt_hours)
         for target in self.targets:
             target.step(dt_hours)
 
-    # ----------------------------
+    
     # Target management
-    # ----------------------------
+    
     def add_target(self, target: Vessel) -> None:
         self.targets.append(target)
 
@@ -34,9 +34,9 @@ class World:
         self.targets = [t for t in self.targets if t.vessel_id != vessel_id]
         return len(matches)
 
-    # ----------------------------
+   
     # Own vessel course control
-    # ----------------------------
+    
     def update_own_heading(self, heading_deg: float) -> None:
         """
         Update own vessel heading.
@@ -49,9 +49,9 @@ class World:
         """
         self.own.change_speed(speed_knots)
 
-    # ----------------------------
+    
     # Target vessel course control
-    # ----------------------------
+    
     def update_target_heading(self, vessel_id: str, heading_deg: float) -> int:
         """
         Update heading for all targets matching vessel_id.
@@ -76,9 +76,9 @@ class World:
             t.change_speed(speed_knots)
         return len(targets)
 
-    # ----------------------------
+   
     # Snapshot
-    # ----------------------------
+    
     def snapshot(self) -> Dict[str, Any]:
         alerts = sort_alerts(
             generate_alerts(self.own, self.targets, include_safe=False)
@@ -90,9 +90,9 @@ class World:
             "alerts": [self._alert_snapshot(a) for a in alerts],
         }
 
-    # ----------------------------
+    
     # Snapshot helpers
-    # ----------------------------
+    
     def _own_snapshot(self) -> Dict[str, Any]:
         return {
             "id": self.own.vessel_id,

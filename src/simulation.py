@@ -11,6 +11,8 @@ class Simulation:
         self.running = False
         self.speed_multiplier = 1.0  # real-time by default
 
+
+#for starting and pausing the stimulation
     def start(self) -> None:
         """
         Start the simulation.
