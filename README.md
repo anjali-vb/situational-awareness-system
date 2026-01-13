@@ -15,39 +15,15 @@ A real-time vessel tracking and situational awareness system using WebSocket com
 cd situational-awareness-system
 ```
 
-### 2. Create a virtual environment (recommended)
+### 2. Install dependencies
 
-```bash
-python -m venv .venv
-```
-
-### 3. Activate the virtual environment
-
-**On Windows (PowerShell):**
-
-```bash
-.\.venv\Scripts\Activate.ps1
-```
-
-**On Windows (Command Prompt):**
-
-```bash
-.venv\Scripts\activate.bat
-```
-
-**On macOS/Linux:**
-
-```bash
-source .venv/bin/activate
-```
-
-### 4. Install the package with dependencies
+Install the package and its dependencies using the system Python:
 
 ```bash
 pip install -e .
 ```
 
-This will install the package and all required dependencies including `websockets>=12.0`.
+This will install the package and required dependencies including `websockets>=12.0`.
 
 ## Running the Server
 
@@ -119,17 +95,10 @@ situational-awareness-system/
 
 ## Running Tests
 
-To run the test suite:
+You can run the test suite using the Python standard library's unittest discovery (no external test runner required):
 
 ```bash
-pytest tests/
-```
-
-Or run specific tests:
-
-```bash
-pytest tests/test_simulation.py
-pytest tests/test_vessel.py
+python -m unittest discover -s tests -p "test_*.py"
 ```
 
 ## Development Notes

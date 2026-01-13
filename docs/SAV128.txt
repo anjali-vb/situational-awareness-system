@@ -562,7 +562,6 @@ Each source file has corresponding test files. For example:
 - test_world.py, test_world_snapshot.py, test_world_targets.py - Tests for world management
 - test_simulation.py and test_simulation_speed.py - Tests for simulation control
 - test_alerting.py and test_alerts.py - Integration tests for alerting system
-- test_ui_regression.py - Tests for UI command handling
 
 
 What I Test:
